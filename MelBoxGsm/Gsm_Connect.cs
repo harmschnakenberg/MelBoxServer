@@ -12,6 +12,8 @@ namespace MelBoxGsm
     {
         #region Fields
         private SerialPort Port;
+        const int maxConnectTrys = 5;
+        int currentConnectTrys = 0;
         #endregion
 
         #region Properties
@@ -28,17 +30,20 @@ namespace MelBoxGsm
             int trys = 0;
             while (trys < 3 && (Port == null || !Port.IsOpen))
             {
-                Console.WriteLine("Verbindungsversuch {0}/3", ++trys);
-                ConnectPort();
-
-                if (Port != null && Port.IsOpen)
-                {
-                    SetupGsm();
-                }
+                ++trys;
+                //Öffne COM-PORT
+                if (Port == null)
+                    OnRaiseGsmSystemEvent(new GsmEventArgs(11061347, string.Format("{0}/3 Verbindungsversuch an Port {1}", trys, CurrentComPortName)));
                 else
                 {
-                    Thread.Sleep(2000);
+                    OnRaiseGsmSystemEvent(new GsmEventArgs(11011901, string.Format("{0}/3 Öffne Port {1}", trys, Port.PortName)));
                 }
+
+                Console.WriteLine("Verbindungsversuch " + trys);
+                ConnectPort();
+
+                if (Port == null || !Port.IsOpen)
+                    Thread.Sleep(2000);
             }
         }
 
@@ -56,7 +61,6 @@ namespace MelBoxGsm
                 return;
             }
 
-
             if (!AvailableComPorts.Contains(CurrentComPortName))
             {
                 CurrentComPortName = AvailableComPorts.LastOrDefault();
@@ -71,11 +75,9 @@ namespace MelBoxGsm
             #endregion
 
             #region Verbinde ComPort
-            Console.WriteLine("Öffne Port {0}...", CurrentComPortName);
-            //OnRaiseGsmSystemEvent(new GsmEventArgs(11051108, string.Format("Öffne Port {0}...", CurrentComPortName)));
 
-            const int maxConnectTrys = 5;
-            int currentConnectTrys = 0;
+            OnRaiseGsmSystemEvent(new GsmEventArgs(11051108, string.Format("Öffne Port {0}...", CurrentComPortName)));
+
             SerialPort port = new SerialPort();
 
             try
@@ -83,7 +85,7 @@ namespace MelBoxGsm
                 while (port == null || !port.IsOpen)
                 {
                     port.PortName = CurrentComPortName;                     //COM1
-                    port.BaudRate = 19200;                                  //9600
+                    port.BaudRate = 9600;                                   //9600
                     port.DataBits = 8;                                      //8
                     port.StopBits = StopBits.One;                           //1
                     port.Parity = Parity.None;                              //None
@@ -104,7 +106,7 @@ namespace MelBoxGsm
                     {
                         Console.WriteLine("Verbindungsversuch " + currentConnectTrys + " von " + maxConnectTrys);
                         OnRaiseGsmSystemEvent(new GsmEventArgs(11061554, "Verbindungsversuch " + currentConnectTrys + " von " + maxConnectTrys));
-                        Thread.Sleep(1000);
+                        Thread.Sleep(2000);
                     }
                 }
 
@@ -170,7 +172,7 @@ namespace MelBoxGsm
                     {
                         string command = ATCommandQueue.FirstOrDefault();
                         Port.Write(command + "\r");
-                        ATCommandQueue.RemoveAt(0);
+                        ATCommandQueue.Remove(command);
                         OnRaiseGsmSentEvent(new GsmEventArgs(11051045, command));
                         Thread.Sleep(400);
                     }

@@ -73,7 +73,8 @@ namespace MelBoxGsm
             {
                 if (byte.TryParse(m.Groups[1].Value, out byte trackingId))
                 {
-                    Sms firstNew = SmsQueue.FindAll(x => x.TrackingId == 0).First();
+                    Sms firstNew = SmsQueue.FindAll(x => x.TrackingId == 0).FirstOrDefault();
+                    if (firstNew == null) continue;
                     firstNew.TrackingId = trackingId;
                     OnRaiseSmsSentEvent(firstNew);
                 }

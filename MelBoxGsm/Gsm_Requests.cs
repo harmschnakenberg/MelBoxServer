@@ -86,8 +86,9 @@ namespace MelBoxGsm
             OnRaiseGsmSystemEvent(new GsmEventArgs(11111726, "Die SMS mit der Id " + smsId + " wird gelöscht."));
             
             string cmd = "AT+CMGD=" + smsId;
-            if (ATCommandQueue.Contains(cmd)) return;
-            AddAtCommand(cmd);
+            // if (ATCommandQueue.Contains(cmd)) return;
+            // AddAtCommand(cmd);
+            Port.Write(cmd + "\r");
         }
 
         #endregion

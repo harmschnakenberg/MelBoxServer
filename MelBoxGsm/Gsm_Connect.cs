@@ -24,12 +24,21 @@ namespace MelBoxGsm
         #endregion
 
         public Gsm()
-        {            
-            ConnectPort();
-
-            if (Port != null && Port.IsOpen)
+        {
+            int trys = 0;
+            while (trys < 3 && (Port == null || !Port.IsOpen))
             {
-                SetupGsm();
+                Console.WriteLine("Verbindungsversuch {0}/3", ++trys);
+                ConnectPort();
+
+                if (Port != null && Port.IsOpen)
+                {
+                    SetupGsm();
+                }
+                else
+                {
+                    Thread.Sleep(2000);
+                }
             }
         }
 
@@ -47,6 +56,7 @@ namespace MelBoxGsm
                 return;
             }
 
+
             if (!AvailableComPorts.Contains(CurrentComPortName))
             {
                 CurrentComPortName = AvailableComPorts.LastOrDefault();
@@ -61,8 +71,8 @@ namespace MelBoxGsm
             #endregion
 
             #region Verbinde ComPort
-
-            OnRaiseGsmSystemEvent(new GsmEventArgs(11051108, string.Format("Öffne Port {0}...", CurrentComPortName)));
+            Console.WriteLine("Öffne Port {0}...", CurrentComPortName);
+            //OnRaiseGsmSystemEvent(new GsmEventArgs(11051108, string.Format("Öffne Port {0}...", CurrentComPortName)));
 
             const int maxConnectTrys = 5;
             int currentConnectTrys = 0;
@@ -94,7 +104,7 @@ namespace MelBoxGsm
                     {
                         Console.WriteLine("Verbindungsversuch " + currentConnectTrys + " von " + maxConnectTrys);
                         OnRaiseGsmSystemEvent(new GsmEventArgs(11061554, "Verbindungsversuch " + currentConnectTrys + " von " + maxConnectTrys));
-                        Thread.Sleep(2000);
+                        Thread.Sleep(1000);
                     }
                 }
 

@@ -140,22 +140,24 @@ namespace MelBoxGsm
 
                     if (status != "REC UNREAD" && status != "REC READ") continue; //nur empfangene Nachrichten
 
-                    Sms confiredSms = SmsQueue.FindAll(x => x.TrackingId == trackingId).First();
-                    confiredSms.SendStatus = trackingStatus;
-
-                    OnRaiseSmsStatusreportEvent(confiredSms);
-
-                    if (confiredSms.SendStatus < 32) //SMS erfolgreich versendet
+                    Sms confiredSms = SmsQueue.FindAll(x => x.TrackingId == trackingId).FirstOrDefault();
+                    if (confiredSms != null)
                     {
-                        SmsQueue.Remove(confiredSms);
-                    }
+                        confiredSms.SendStatus = trackingStatus;
+                        OnRaiseSmsStatusreportEvent(confiredSms);
 
-                    SmsDelete(index); //Diesen Statusreport löschen
+                        if (confiredSms.SendStatus < 32) //SMS erfolgreich versendet
+                        {
+                            SmsQueue.Remove(confiredSms);
+                        }
+                    }
+                        SmsDelete(index); //Diesen Statusreport löschen
+                    
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                throw new Exception("FEHLER ParseStatusReport():\r\n" + input);
+                throw ex;
             }
         }
 

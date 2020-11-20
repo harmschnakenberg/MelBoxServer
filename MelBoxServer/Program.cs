@@ -18,9 +18,16 @@ namespace MelBoxServer
             gsm.RaiseSmsRecievedEvent += HandleSmsRecievedEvent;
             gsm.RaiseSmsSentEvent += HandleSmsSentEvent;
 
+          
+            string cmdLine = "AT";
+            gsm.AddAtCommand(cmdLine);
 
-            gsm.AddAtCommand("AT");
-
+            Console.WriteLine("\r\nAT-Befehl eingeben:");
+            while (cmdLine.Length > 0)
+            {
+                cmdLine = Console.ReadLine();
+                gsm.AddAtCommand(cmdLine);
+            }
 
             Console.WriteLine("Beenden mit beliebieger Taste...");
             Console.ReadKey();

@@ -69,7 +69,7 @@ namespace MelBoxGsm
                 Console.WriteLine("In Sendungsnachverfolgung: " + SmsQueue.Count);
                 foreach (Sms sms in SmsQueue)
                 {
-                    Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}...", sms.LogSentId, sms.Index, sms.SendStatus, sms.SendTrys, sms.Content.Substring(0, 10));
+                    Console.WriteLine("unique:{0}\tindex:{1}\ttracking:{2}\tstatus:{3}\ttrys:{4}\ttext:{5}...", sms.LogSentId, sms.Index, sms.TrackingId, sms.SendStatus, sms.SendTrys, sms.Content.Substring(0, 10));
                 }
                 #endregion
 
@@ -99,12 +99,16 @@ namespace MelBoxGsm
 
             while (m.Success)
             {
+               
                 if (byte.TryParse(m.Groups[1].Value, out byte trackingId))
                 {
+                    Console.WriteLine("Tracking-ID für gesendet SMS:" + trackingId);
                     Sms firstNew = SmsQueue.FindAll(x => x.TrackingId == 0).FirstOrDefault();
                     if (firstNew == null) continue;
-                    firstNew.TrackingId = trackingId;
-                    OnRaiseSmsSentEvent(firstNew);
+                    int i = SmsQueue.IndexOf(firstNew);
+                    SmsQueue[i].TrackingId = trackingId;
+                    //firstNew.TrackingId = trackingId;
+                    OnRaiseSmsSentEvent(SmsQueue[i]);
                 }
                 m = m.NextMatch();
             }
@@ -160,6 +164,17 @@ namespace MelBoxGsm
                 Regex r = new Regex(@"\+CMGL: (\d+),""(.+)"",(\d+),(\d+),,,""(.+)"",""(.+)"",(\d+)");
                 Match m = r.Match(input);
 
+                if(m.Length > 0)
+                {
+                    #region TEST Sendungsnachverfolgung
+                    Console.WriteLine("In Sendungsnachverfolgung: " + SmsQueue.Count);
+                    foreach (Sms sms in SmsQueue)
+                    {
+                        Console.WriteLine("unique:{0}\tindex:{1}\ttracking:{2}\tstatus:{3}\ttrys:{4}\ttext:{5}...", sms.LogSentId, sms.Index, sms.TrackingId, sms.SendStatus, sms.SendTrys, sms.Content.Substring(0, 10));
+                    }
+                    #endregion
+                }
+
                 while (m.Success)
                 {
                     byte.TryParse(m.Groups[1].Value, out byte index);
@@ -180,7 +195,9 @@ namespace MelBoxGsm
                             SmsQueue.Remove(confiredSms);
                         }
                     }
-                    SmsToDelete.Add(index); //Diesen Statusreport löschen                   
+                    SmsToDelete.Add(index); //Diesen Statusreport löschen 
+
+                    m = m.NextMatch();
                 }
             }
             catch (Exception ex)
@@ -247,6 +264,7 @@ namespace MelBoxGsm
                         OnRaiseSmsRecievedEvent(sms);
                         SmsToDelete.Add(sms.Index);
                     }
+                    m = m.NextMatch();
                 }
             }
             catch (Exception ex)

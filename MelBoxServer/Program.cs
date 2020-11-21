@@ -24,8 +24,17 @@ namespace MelBoxServer
             Console.WriteLine("\r\nAT-Befehl eingeben:");
             while (cmdLine.Length > 0)
             {
-                cmdLine = Console.ReadLine();
-                gsm.AddAtCommand(cmdLine);
+                if (cmdLine.StartsWith(">send"))
+                {
+                    string[] s = cmdLine.Split(';');
+
+                    gsm.SmsSend(MelBoxGsm.Gsm.StrToPhone(s[1]), s[2]);
+                }
+                else
+                {
+                    cmdLine = Console.ReadLine();
+                    gsm.AddAtCommand(cmdLine);
+                }
             }
 
             Console.WriteLine("Beenden mit beliebieger Taste...");

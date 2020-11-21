@@ -52,11 +52,13 @@ namespace MelBoxGsm
                 else
                 {
                     //Erneut senden
-                    sms.SendTrys++;
+                    sms.SendTrys++; //Sendeversuche hochzählen
+                   // SetRetrySendSmsTimer(sms.LogSentId); //Wieder in die Sendungsnachverfolgung geben
+                    OnRaiseSmsSentEvent(sms); //Erneutes Senden melden
+
                     const string ctrlz = "\u001a";
-                    AddAtCommand("AT+CMGS=\"+" + sms.Phone + "\"\r");
+                    AddAtCommand("AT+CMGS=\"+" + sms.Phone + "\"\r"); //Senden
                     AddAtCommand(sms.Content + ctrlz);
-                    OnRaiseSmsSentEvent(sms);
                 }
             }
         }
@@ -81,7 +83,7 @@ namespace MelBoxGsm
         /// <summary>
         /// Index der Empfangsbestätigung im Modem-Speicher
         /// </summary>
-        public byte TrackingId { get; set; }
+        public byte TrackingId { get; set; } = 0;
 
         /// <summary>
         /// Status-Text von GSM-Modem

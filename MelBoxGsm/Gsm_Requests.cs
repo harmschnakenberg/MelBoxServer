@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace MelBoxGsm
 {
@@ -7,6 +8,8 @@ namespace MelBoxGsm
        
         private void SetupGsm()
         {
+            RaiseGsmRecEvent += InterpretGsmRecEvent;
+
             //Textmode
             AddAtCommand("AT+CMGF=1");
 
@@ -44,20 +47,21 @@ namespace MelBoxGsm
 
         #region SMS versenden
         /// <summary>
-        /// 
+        /// Erstellt und übergibt eine SMS an das GSM-Modem zum senden. Triggert die Sendungsnachverfolgung. 
         /// </summary>
-        /// <param name="logSentId"></param>
-        /// <param name="phone"></param>
-        /// <param name="content"></param>
-        public void SmsSend(int logSentId, ulong phone, string content)
+        /// <param name="phone">Telefonnummer an die diese SMS gesendet werden soll (als Zahl mit Ländervorwahl).</param>
+        /// <param name="content">Inhalt der SMS</param>
+        /// <param name="logSentId">Eindeutige ID für Sendungsnachverfolgung durch Aufrufer. Wird automatisch vergeben, wenn keine Angabe.</param>
+        public void SmsSend(ulong phone, string content, int logSentId = 0)
         {
-            List<Sms> results = SmsQueue.FindAll(x => x.LogSentId == logSentId);
+            List<Sms> results = SmsQueue.FindAll(x => x.Phone == phone && x.Content == content);
             if (results.Count == 0)
             {
                 //Inhalt vorbereiten
                 const string ctrlz = "\u001a";
                 content = content.Replace("\r\n", " ");
                 if (content.Length > 160) content = content.Substring(0, 160);
+                if (logSentId < 1) logSentId = DateTime.Now.Millisecond;
 
                 Sms sms = new Sms
                 {
@@ -69,7 +73,7 @@ namespace MelBoxGsm
 
                 //Sendungsnachverfolgung
                 SmsQueue.Add(sms);
-                SetRetrySendSmsTimer(logSentId);
+                SetRetrySendSmsTimer(sms.LogSentId);
 
                 //Senden
                 AddAtCommand("AT+CMGS=\"+" + phone + "\"\r");

@@ -115,9 +115,7 @@ namespace MelBoxGsm
                     }
                     else
                     {
-                        //Console.WriteLine("Verbindungsversuch " + currentConnectTrys + " von " + maxConnectTrys);
                         OnRaiseGsmSystemEvent(new GsmEventArgs(11061554, "Verbindungsversuch " + currentConnectTrys + " von " + maxConnectTrys));
-                        Thread.Sleep(2000);
                     }
                 }
                 catch (ArgumentException ex_arg)
@@ -132,6 +130,9 @@ namespace MelBoxGsm
                 {
                     OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11011514, string.Format("Das Modem konnte nicht an COM-Port {0} erreicht werden. \r\n{1}\r\n{2}", CurrentComPortName, ex_io.GetType(), ex_io.Message)));
                 }
+
+                if (port == null) Thread.Sleep(2000);
+
             }
             currentConnectTrys = 0;
 
@@ -180,6 +181,8 @@ namespace MelBoxGsm
                     Thread.Sleep(200);
                     if (Port != null)
                     {
+                        Port.DiscardInBuffer();
+                        Port.DiscardOutBuffer();
                         string command = ATCommandQueue.FirstOrDefault();
                         Port.Write(command + "\r");
                         ATCommandQueue.Remove(command);

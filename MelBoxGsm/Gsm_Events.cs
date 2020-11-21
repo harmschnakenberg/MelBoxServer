@@ -123,8 +123,10 @@ namespace MelBoxGsm
         //Receive data from port
         internal void Port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            if (Port == null) return;
+            if (Port == null || !Port.IsOpen) return;
 
+            Port.DiscardInBuffer();
+            Port.DiscardOutBuffer();
             System.Threading.Thread.Sleep(100); //Liest nicht immer den vollständigen Bytesatz 
             string answer = ReadFromPort();
 
@@ -138,7 +140,7 @@ namespace MelBoxGsm
             OnRaiseGsmRecEvent(new GsmEventArgs(11051044, answer));
 
             //Interpretiere das empfangene auf verwertbare Inhalte
-            InterpretGsmRecEvent(null, new GsmEventArgs(111816464, answer));
+            //InterpretGsmRecEvent(null, new GsmEventArgs(111816464, answer));
         }
 
         /// <summary>
@@ -149,6 +151,7 @@ namespace MelBoxGsm
         {
             try
             {
+                System.Threading.Thread.Sleep(100); //Angstpause
                 int dataLength = Port.BytesToRead;
                 byte[] data = new byte[dataLength];
                 int nbrDataRead = Port.Read(data, 0, dataLength);

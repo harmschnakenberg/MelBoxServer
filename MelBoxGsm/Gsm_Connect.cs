@@ -4,7 +4,6 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MelBoxGsm
 {
@@ -25,26 +24,36 @@ namespace MelBoxGsm
         private static List<string> ATCommandQueue { get; set; } = new List<string>();
         #endregion
 
-        public Gsm()
+        public void TryConnectPort()
         {
-            int trys = 0;
-            while (trys < 3 && (Port == null || !Port.IsOpen))
+            //int trys = 0;
+            //while (trys < 3 && (Port == null || !Port.IsOpen)) //Wiederholter Verbindungsversuch
+            //{
+            //    ++trys;
+            //    //Öffne COM-PORT
+            //    if (Port == null)
+            //        OnRaiseGsmSystemEvent(new GsmEventArgs(11061347, string.Format("{0}/3 Verbindungsversuch an Port {1}", trys, CurrentComPortName)));
+            //    else
+            //    {
+            //        OnRaiseGsmSystemEvent(new GsmEventArgs(11011901, string.Format("{0}/3 Öffne Port {1}", trys, Port.PortName)));
+            //    }
+
+            //    ConnectPort();
+
+            //    if (Port == null || !Port.IsOpen)
+            //        Thread.Sleep(2000);
+            //}
+
+            ConnectPort();
+
+            if (Port == null || !Port.IsOpen) //Verbindung ist fehlgeschlagen
             {
-                ++trys;
-                //Öffne COM-PORT
-                if (Port == null)
-                    OnRaiseGsmSystemEvent(new GsmEventArgs(11061347, string.Format("{0}/3 Verbindungsversuch an Port {1}", trys, CurrentComPortName)));
-                else
-                {
-                    OnRaiseGsmSystemEvent(new GsmEventArgs(11011901, string.Format("{0}/3 Öffne Port {1}", trys, Port.PortName)));
-                }
-
-                Console.WriteLine("Verbindungsversuch " + trys);
-                ConnectPort();
-
-                if (Port == null || !Port.IsOpen)
-                    Thread.Sleep(2000);
+                ClosePort();
+                System.Threading.Thread.Sleep(5000); //Pause zum lesen der Bildschirmausgabe.
+                Environment.Exit(0);
             }
+
+            SetupGsm();
         }
 
         /// <summary>
@@ -57,7 +66,7 @@ namespace MelBoxGsm
 
             if (AvailableComPorts.Count < 1)
             {
-                OnRaiseGsmSystemEvent(new GsmEventArgs(11011512, "Es sind keine COM-Ports vorhanden"));
+                OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11011512, "Es sind keine COM-Ports vorhanden"));
                 return;
             }
 
@@ -80,9 +89,10 @@ namespace MelBoxGsm
 
             SerialPort port = new SerialPort();
 
-            try
+            while (port == null || !port.IsOpen)
             {
-                while (port == null || !port.IsOpen)
+
+                try
                 {
                     port.PortName = CurrentComPortName;                     //COM1
                     port.BaudRate = 9600;                                   //9600
@@ -93,6 +103,7 @@ namespace MelBoxGsm
                     port.WriteTimeout = 300;                                //300
                     port.Encoding = Encoding.GetEncoding("iso-8859-1");
                     port.DataReceived += new SerialDataReceivedEventHandler(Port_DataReceived);
+                    port.ErrorReceived += new SerialErrorReceivedEventHandler(Port_ErrorReceived);
                     port.Open();
                     port.DtrEnable = true;
                     port.RtsEnable = true;
@@ -104,26 +115,25 @@ namespace MelBoxGsm
                     }
                     else
                     {
-                        Console.WriteLine("Verbindungsversuch " + currentConnectTrys + " von " + maxConnectTrys);
+                        //Console.WriteLine("Verbindungsversuch " + currentConnectTrys + " von " + maxConnectTrys);
                         OnRaiseGsmSystemEvent(new GsmEventArgs(11061554, "Verbindungsversuch " + currentConnectTrys + " von " + maxConnectTrys));
                         Thread.Sleep(2000);
                     }
                 }
-
-                currentConnectTrys = 0;
+                catch (ArgumentException ex_arg)
+                {
+                    OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11011514, string.Format("COM-Port {0} konnte nicht verbunden werden. \r\n{1}\r\n{2}", CurrentComPortName, ex_arg.GetType(), ex_arg.Message)));
+                }
+                catch (UnauthorizedAccessException ex_unaut)
+                {
+                    OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11011514, string.Format("Der Zugriff auf COM-Port {0} wurde verweigert. \r\n{1}\r\n{2}", CurrentComPortName, ex_unaut.GetType(), ex_unaut.Message)));
+                }
+                catch (System.IO.IOException ex_io)
+                {
+                    OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11011514, string.Format("Das Modem konnte nicht an COM-Port {0} erreicht werden. \r\n{1}\r\n{2}", CurrentComPortName, ex_io.GetType(), ex_io.Message)));
+                }
             }
-            catch (ArgumentException ex_arg)
-            {
-                OnRaiseGsmSystemEvent(new GsmEventArgs(11011514, string.Format("COM-Port {0} konnte nicht verbunden werden. \r\n{1}\r\n{2}", CurrentComPortName, ex_arg.GetType(), ex_arg.Message)));
-            }
-            catch (UnauthorizedAccessException ex_unaut)
-            {
-                OnRaiseGsmSystemEvent(new GsmEventArgs(11011514, string.Format("Der Zugriff auf COM-Port {0} wurde verweigert. \r\n{1}\r\n{2}", CurrentComPortName, ex_unaut.GetType(), ex_unaut.Message)));
-            }
-            catch (System.IO.IOException ex_io)
-            {
-                OnRaiseGsmSystemEvent(new GsmEventArgs(11011514, string.Format("Das Modem konnte nicht an COM-Port {0} erreicht werden. \r\n{1}\r\n{2}", CurrentComPortName, ex_io.GetType(), ex_io.Message)));
-            }
+            currentConnectTrys = 0;
 
             Port = port;
             #endregion

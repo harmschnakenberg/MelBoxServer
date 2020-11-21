@@ -51,6 +51,20 @@ namespace MelBoxGsm
 		{
 			RaiseGsmRecEvent?.Invoke(this, e);
 		}
+
+        /// <summary>
+        /// Event 'string empfangen von COM'
+        /// </summary>
+        public event EventHandler<GsmEventArgs> RaiseGsmFatalErrorEvent;
+
+        /// <summary>
+        /// Triggert das Event 'string empfangen von COM'
+        /// </summary>
+        /// <param name="e"></param>
+        protected virtual void OnRaiseGsmFatalErrorEvent(GsmEventArgs e)
+        {
+            RaiseGsmFatalErrorEvent?.Invoke(this, e);
+        }
         #endregion
 
         #region Public Advanced Gsm Events
@@ -98,6 +112,14 @@ namespace MelBoxGsm
         #endregion
 
         #region Internal Events
+
+        internal void Port_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+        {
+            Console.WriteLine("Fehler von COM-Port: " + e.EventType);
+            OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11211443, "Fehler von COM-Port: " + e.EventType));
+            ClosePort();
+        }
+
         //Receive data from port
         internal void Port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {

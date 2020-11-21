@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace MelBoxGsm
 {
@@ -16,6 +12,11 @@ namespace MelBoxGsm
         /// int = MessageReference <mr>
         /// </summary>
         internal static List<Sms> SmsQueue { get; set; } = new List<Sms>();
+
+        /// <summary>
+        /// Merkliste der SMS-Indexe, die zum löschen anstehen
+        /// </summary>
+        internal static List<int> SmsToDelete = new List<int>();
 
         public static int MinutesToSendRetry { get; set; } = 2;
         public static int MaxSendRetrys { get; set; } = 5;

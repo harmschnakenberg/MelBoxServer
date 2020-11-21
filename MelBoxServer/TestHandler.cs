@@ -1,15 +1,19 @@
 ﻿using MelBoxGsm;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MelBoxServer
 {
-	partial class Program
+    partial class Program
 	{
-
+		static void HandleGsmFatalErrorEvent(object sender, GsmEventArgs e)
+		{
+			Console.BackgroundColor = ConsoleColor.DarkRed;
+			Console.ForegroundColor = ConsoleColor.White;
+			Console.WriteLine(e.Id + ": " + e.Message);
+			Console.ForegroundColor = ConsoleColor.Gray;
+			Console.BackgroundColor = ConsoleColor.Black;
+			
+		}
 
 		static void HandleGsmSystemEvent(object sender, GsmEventArgs e)
 		{

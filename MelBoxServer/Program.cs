@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MelBoxServer
 {
@@ -11,6 +7,7 @@ namespace MelBoxServer
         static void Main()
         {
             MelBoxGsm.Gsm gsm = new MelBoxGsm.Gsm();
+            gsm.RaiseGsmFatalErrorEvent += HandleGsmFatalErrorEvent;
             gsm.RaiseGsmSystemEvent += HandleGsmSystemEvent;
             gsm.RaiseGsmSentEvent += HandleGsmSentEvent;
             gsm.RaiseGsmRecEvent += HandleGsmRecEvent;
@@ -18,9 +15,11 @@ namespace MelBoxServer
             gsm.RaiseSmsRecievedEvent += HandleSmsRecievedEvent;
             gsm.RaiseSmsSentEvent += HandleSmsSentEvent;
 
-          
+            gsm.TryConnectPort(); //TEST
+
             string cmdLine = "AT";
             gsm.AddAtCommand(cmdLine);
+
 
             Console.WriteLine("\r\nAT-Befehl eingeben:");
             while (cmdLine.Length > 0)

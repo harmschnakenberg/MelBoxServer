@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace MelBoxGsm
 {
@@ -18,6 +13,9 @@ namespace MelBoxGsm
             //SendATCommand("AT+CPMS=\"SM\""); //ME, SM, MT
             //SendATCommand("AT+CPMS=\"MT\",\"MT\",\"MT\"");
             AddAtCommand("AT+CPMS=\"SM\",\"SM\",\"SM\"");
+
+            //ID-Nummer der SIM-Karte auslesen 
+            AddAtCommand("AT^SCID");
 
             //Erzwinge, dass bei Fehlerhaftem senden "+CMS ERROR: <err>" ausgegeben wird
             //AddAtCommand("AT^SM20=0,0");
@@ -41,21 +39,26 @@ namespace MelBoxGsm
         }
 
         #region SMS empfangen
-
+        //Wird z.Z. nicht aktiv angefragt
         #endregion
 
         #region SMS versenden
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="logSentId"></param>
+        /// <param name="phone"></param>
+        /// <param name="content"></param>
         public void SmsSend(int logSentId, ulong phone, string content)
         {
             List<Sms> results = SmsQueue.FindAll(x => x.LogSentId == logSentId);
             if (results.Count == 0)
             {
-                //Inhalt 
+                //Inhalt vorbereiten
                 const string ctrlz = "\u001a";
                 content = content.Replace("\r\n", " ");
                 if (content.Length > 160) content = content.Substring(0, 160);
 
-                //Tracking
                 Sms sms = new Sms
                 {
                     LogSentId = logSentId,
@@ -64,6 +67,7 @@ namespace MelBoxGsm
                     SendTrys = 1
                 };
 
+                //Sendungsnachverfolgung
                 SmsQueue.Add(sms);
                 SetRetrySendSmsTimer(logSentId);
 
@@ -72,7 +76,6 @@ namespace MelBoxGsm
                 AddAtCommand(content + ctrlz);
             }        
         }
-
 
         #endregion
 

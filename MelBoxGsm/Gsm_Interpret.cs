@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace MelBoxGsm
 {
@@ -18,11 +15,27 @@ namespace MelBoxGsm
         {
             string input = e.Message;
 
+            if (input.Contains("AT^SCID"))
+            {
+                if (input.Contains("ERROR"))
+                {
+                    OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11211523, "Es wurde keine SIM-Karte im GSM-Modem erkannt."));
+                }
+            } 
+
+            if (input.Contains("+CREG:"))
+            {
+                if (input.Contains("+CREG: 0,0"))
+                {
+                    OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11211540, "Das GSM-Modem ist nicht im Mobilfunknetz angemeldet."));
+                }
+            }
+
             if (input.Contains("+CMGS:") || input.Contains("+CMSS:")) //COM-Antwort auf Gesendete SMS
             {
                 ParseSmsTrackingIdFromSendResponse(input);
             }
-            else
+
             if (input.Contains("+CDSI:")) //Indikator neuen Statusreport empfangen
             {
                 /*
@@ -34,7 +47,8 @@ namespace MelBoxGsm
                 //*/
                 ParseRecieveStatusreportIndicator(input);
             }
-            else if (input.Contains("+CMTI:")) //Indikator neuee SMS empfangen
+
+            if (input.Contains("+CMTI:")) //Indikator neuee SMS empfangen
             {
                 /*
                 Meldung einer neu eingegangenen Nachricht von GSM-Modem
@@ -45,12 +59,26 @@ namespace MelBoxGsm
                 //*/
                 ParseRecieveNewSmsIndicator(input);
             }
-            else
+
             if (input.Contains("+CMGL:")) //Inhalt der gelesenen Nachrichten
             {
                 ParseStatusReport(input);
                 ParseRecMessages(input);
+
+                #region TEST Sendungsnachverfolgung
+                Console.WriteLine("In Sendungsnachverfolgung: " + SmsQueue.Count);
+                foreach (Sms sms in SmsQueue)
+                {
+                    Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}...", sms.LogSentId, sms.Index, sms.SendStatus, sms.SendTrys, sms.Content.Substring(0, 10));
+                }
+                #endregion
+
+                foreach (int index in SmsToDelete) //lösche SMSen aus GSM-Speicher
+                {
+                    SmsDelete(index);
+                }
             }
+
         }
 
         /// <summary>
@@ -152,8 +180,7 @@ namespace MelBoxGsm
                             SmsQueue.Remove(confiredSms);
                         }
                     }
-                        SmsDelete(index); //Diesen Statusreport löschen
-                    
+                    SmsToDelete.Add(index); //Diesen Statusreport löschen                   
                 }
             }
             catch (Exception ex)
@@ -163,7 +190,7 @@ namespace MelBoxGsm
         }
 
         /// <summary>
-        /// BAUSTELLE
+        /// Lese SMS-Textnachricht, melde und lösche die Nachricht anschließend.
         /// </summary>
         /// <param name="input"></param>
         private void ParseRecMessages(string input)
@@ -204,7 +231,7 @@ namespace MelBoxGsm
                 //*/
                 #endregion
 
-                Regex r = new Regex(@"\+CMGL: (\d+),""(.+)"",""(.+)"",(.*),""(.+)""\r\n(.+)");
+                Regex r = new Regex(@"\+CMGL: (\d+),""(.+)"",""(.+)"",(.*),""(.+)""\r\n(.+)\r\n");
                 Match m = r.Match(input);
 
                 while (m.Success)
@@ -218,7 +245,7 @@ namespace MelBoxGsm
                     if (sms.Status == "REC UNREAD" || sms.Status == "REC READ")
                     {
                         OnRaiseSmsRecievedEvent(sms);
-                        SmsDelete(sms.Index);
+                        SmsToDelete.Add(sms.Index);
                     }
                 }
             }

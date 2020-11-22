@@ -65,18 +65,14 @@ namespace MelBoxGsm
                 ParseStatusReport(input);
                 ParseRecMessages(input);
 
-                #region TEST Sendungsnachverfolgung
-                Console.WriteLine("In Sendungsnachverfolgung: " + SmsQueue.Count);
-                foreach (Sms sms in SmsQueue)
-                {
-                    Console.WriteLine("unique:{0}\tindex:{1}\ttracking:{2}\tstatus:{3}\ttrys:{4}\ttext:{5}...", sms.LogSentId, sms.Index, sms.TrackingId, sms.SendStatus, sms.SendTrys, sms.Content.Substring(0, 10));
-                }
-                #endregion
+                DebugTracking();
 
                 foreach (int index in SmsToDelete) //lösche SMSen aus GSM-Speicher
                 {
                     SmsDelete(index);
                 }
+
+                CheckForResend();
             }
 
         }
@@ -110,6 +106,8 @@ namespace MelBoxGsm
                     //firstNew.TrackingId = trackingId;
                     OnRaiseSmsSentEvent(SmsQueue[i]);
                 }
+
+                DebugTracking();
                 m = m.NextMatch();
             }
         }
@@ -166,13 +164,7 @@ namespace MelBoxGsm
 
                 if(m.Length > 0)
                 {
-                    #region TEST Sendungsnachverfolgung
-                    Console.WriteLine("In Sendungsnachverfolgung: " + SmsQueue.Count);
-                    foreach (Sms sms in SmsQueue)
-                    {
-                        Console.WriteLine("unique:{0}\tindex:{1}\ttracking:{2}\tstatus:{3}\ttrys:{4}\ttext:{5}...", sms.LogSentId, sms.Index, sms.TrackingId, sms.SendStatus, sms.SendTrys, sms.Content.Substring(0, 10));
-                    }
-                    #endregion
+                    DebugTracking();
                 }
 
                 while (m.Success)
@@ -273,5 +265,20 @@ namespace MelBoxGsm
             }
         }
 
+        /// <summary>
+        /// Nur wird nur zu Debug-Zwecken aufgerufen
+        /// </summary>
+        private void DebugTracking()
+        {
+#if DEBUG
+            #region TEST Sendungsnachverfolgung
+            Console.WriteLine("In Sendungsnachverfolgung: " + SmsQueue.Count);
+            foreach (Sms sms in SmsQueue)
+            {
+                Console.WriteLine("unique:{0}\tindex:{1}\ttracking:{2}\tstatus:{3}\ttrys:{4}\ttext:{5}...", sms.LogSentId, sms.Index, sms.TrackingId, sms.SendStatus, sms.SendTrys, sms.Content.Substring(0, 10));
+            }
+            #endregion
+#endif
+        }
     }
 }

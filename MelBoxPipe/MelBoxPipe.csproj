@@ -4,17 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DB4EAFA5-BD75-4A49-8CF5-A8D6A5CB5E59}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>MelBoxServer</RootNamespace>
-    <AssemblyName>MelBoxServer</AssemblyName>
+    <ProjectGuid>{2EF40402-5207-485D-82CA-0FB76FEEDC1A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MelBoxPipe</RootNamespace>
+    <AssemblyName>MelBoxPipe</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -43,26 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Pipe_Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestHandler.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MelBoxGsm\MelBoxGsm.csproj">
-      <Project>{06da638e-4b92-450c-8f27-1bd5d282ecc7}</Project>
-      <Name>MelBoxGsm</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MelBoxPipe\MelBoxPipe.csproj">
-      <Project>{2ef40402-5207-485d-82ca-0fb76feedc1a}</Project>
-      <Name>MelBoxPipe</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MelBoxSql\MelBoxSql.csproj">
-      <Project>{15ada787-941b-41aa-83b5-c2ac51831ae3}</Project>
-      <Name>MelBoxSql</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

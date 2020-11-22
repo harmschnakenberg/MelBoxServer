@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace MelBoxGsm
 {
@@ -26,39 +27,49 @@ namespace MelBoxGsm
 
         #region Methods
         /// <summary>
-        /// Timer für Sendewiederholungen
+        /// Waretet eine Zeit und stößt dann das Lesen des GSM-Speichers an
         /// </summary>
-        internal void SetRetrySendSmsTimer(int uniqueSmsIdentifier)
+        internal void SetRetrySendSmsTimer()
         {
             System.Timers.Timer aTimer = new System.Timers.Timer(MinutesToSendRetry * 60000); //2 min
-            aTimer.Elapsed += (sender, eventArgs) => OnRetrySendSms(uniqueSmsIdentifier);
+            aTimer.Elapsed += (sender, eventArgs) => AddAtCommand("AT+CMGL=\"ALL\"");
             aTimer.AutoReset = false;
             aTimer.Enabled = true;
         }
 
-        private void OnRetrySendSms(int uniqueSmsIdentifier)
+        private void CheckForResend()
         {
-           List<Sms> retrys = SmsQueue.FindAll(x => x.LogSentId == uniqueSmsIdentifier);
-
-            foreach (Sms sms in retrys)
+            DebugTracking();
+            foreach (Sms sms in SmsQueue)
             {
-                if(sms.SendTrys > MaxSendRetrys)
+                if (sms.LastSendTime.AddMinutes(MinutesToSendRetry).CompareTo(DateTime.Now) < 0) //  Kleiner als 0 (null): t1 liegt vor t2.
                 {
-                    //Max. Sendeversuche überschritten, Senden verwerfen
-                    sms.SendStatus = 254;
-                    OnRaiseSmsStatusreportEvent(sms);
-                    SmsQueue.Remove(sms);
-                } 
-                else
-                {
-                    //Erneut senden
-                    sms.SendTrys++; //Sendeversuche hochzählen
-                   // SetRetrySendSmsTimer(sms.LogSentId); //Wieder in die Sendungsnachverfolgung geben
-                    OnRaiseSmsSentEvent(sms); //Erneutes Senden melden
+                    //Zeit für Sendebestätigung überschritten
+                    if (sms.SendTrys > MaxSendRetrys)
+                    {
+                        //Max. Sendeversuche überschritten, Senden verwerfen
+                        sms.SendStatus = 254;
+                        OnRaiseSmsStatusreportEvent(sms);
+                        if (!SmsQueue.Remove(sms))
+                        {
+                            Console.WriteLine("Die SMS {0} konnte nicht aus der Überwachungsliste entwernt werden.\r\nAn: +{1}\r\n{2}", sms.LogSentId, sms.Phone, sms.Content);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Die SMS {0} wurde aus der Sendeungsverfolgung genommen." , sms.LogSentId);
+                        }
+                    }
+                    else
+                    {
+                        int i = SmsQueue.IndexOf(sms);
+                        //Erneut senden
+                        SmsQueue[i].SendTrys++; //Sendeversuche hochzählen                                   
+                        OnRaiseSmsSentEvent(sms); //Erneutes Senden melden
 
-                    const string ctrlz = "\u001a";
-                    AddAtCommand("AT+CMGS=\"+" + sms.Phone + "\"\r"); //Senden
-                    AddAtCommand(sms.Content + ctrlz);
+                        const string ctrlz = "\u001a";
+                        AddAtCommand("AT+CMGS=\"+" + sms.Phone + "\"\r"); //Senden
+                        AddAtCommand(sms.Content + ctrlz);
+                    }
                 }
             }
         }
@@ -115,6 +126,9 @@ namespace MelBoxGsm
         /// Sendeversuche
         /// </summary>
         public int SendTrys { get; set; }
+
+        public DateTime LastSendTime { get; set; } = DateTime.Now;
+
         #endregion
 
         #region Methods

@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MelBoxSql", "MelBoxSql\MelB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MelBoxGsm", "MelBoxGsm\MelBoxGsm.csproj", "{06DA638E-4B92-450C-8F27-1BD5D282ECC7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MelBoxPipe", "MelBoxPipe\MelBoxPipe.csproj", "{2EF40402-5207-485D-82CA-0FB76FEEDC1A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MelBoxManager", "MelBoxManager\MelBoxManager.csproj", "{2593F032-C46C-4232-9564-AD605174FF44}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{06DA638E-4B92-450C-8F27-1BD5D282ECC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06DA638E-4B92-450C-8F27-1BD5D282ECC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06DA638E-4B92-450C-8F27-1BD5D282ECC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EF40402-5207-485D-82CA-0FB76FEEDC1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EF40402-5207-485D-82CA-0FB76FEEDC1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EF40402-5207-485D-82CA-0FB76FEEDC1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EF40402-5207-485D-82CA-0FB76FEEDC1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2593F032-C46C-4232-9564-AD605174FF44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2593F032-C46C-4232-9564-AD605174FF44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2593F032-C46C-4232-9564-AD605174FF44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2593F032-C46C-4232-9564-AD605174FF44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

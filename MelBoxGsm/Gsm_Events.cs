@@ -125,9 +125,7 @@ namespace MelBoxGsm
         {
             if (Port == null || !Port.IsOpen) return;
 
-            Port.DiscardInBuffer();
-            Port.DiscardOutBuffer();
-            System.Threading.Thread.Sleep(100); //Liest nicht immer den vollständigen Bytesatz 
+
             string answer = ReadFromPort();
 
             //if ((answer.Length == 0) || ((!answer.EndsWith("\r\n> ")) && (!answer.EndsWith("\r\nOK\r\n"))))
@@ -151,13 +149,15 @@ namespace MelBoxGsm
         {
             try
             {
-                System.Threading.Thread.Sleep(100); //Angstpause
-                int dataLength = Port.BytesToRead;
-                byte[] data = new byte[dataLength];
-                int nbrDataRead = Port.Read(data, 0, dataLength);
-                if (nbrDataRead == 0)
-                    return string.Empty;
-                return Encoding.ASCII.GetString(data);
+                Port.DiscardInBuffer();
+                Port.DiscardOutBuffer();
+                string answer = string.Empty;
+                while (answer.Length < 2)
+                {
+                    System.Threading.Thread.Sleep(Port.ReadTimeout); //Ist sonst unvollständig
+                    answer += Port.ReadExisting();
+                }
+                return answer; 
             }
             catch (TimeoutException ex_time)
             {

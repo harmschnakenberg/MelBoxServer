@@ -73,7 +73,7 @@ namespace MelBoxGsm
 
                 //Sendungsnachverfolgung
                 SmsQueue.Add(sms);
-                SetRetrySendSmsTimer(sms.LogSentId);
+                SetRetrySendSmsTimer();
 
                 //Senden
                 AddAtCommand("AT+CMGS=\"+" + phone + "\"\r");
@@ -91,11 +91,10 @@ namespace MelBoxGsm
         private void SmsDelete(int smsId)
         {
             OnRaiseGsmSystemEvent(new GsmEventArgs(11111726, "Die SMS mit der Id " + smsId + " wird gelöscht."));
-            
+
             string cmd = "AT+CMGD=" + smsId;
-            // if (ATCommandQueue.Contains(cmd)) return;
-            // AddAtCommand(cmd);
-            Port.Write(cmd + "\r");
+            if (ATCommandQueue.Contains(cmd)) return;
+            AddAtCommand(cmd);
         }
 
         #endregion

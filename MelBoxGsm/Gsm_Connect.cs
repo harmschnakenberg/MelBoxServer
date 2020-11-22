@@ -121,14 +121,17 @@ namespace MelBoxGsm
                 catch (ArgumentException ex_arg)
                 {
                     OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11011514, string.Format("COM-Port {0} konnte nicht verbunden werden. \r\n{1}\r\n{2}", CurrentComPortName, ex_arg.GetType(), ex_arg.Message)));
+                    Thread.Sleep(2000);
                 }
                 catch (UnauthorizedAccessException ex_unaut)
                 {
                     OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11011514, string.Format("Der Zugriff auf COM-Port {0} wurde verweigert. \r\n{1}\r\n{2}", CurrentComPortName, ex_unaut.GetType(), ex_unaut.Message)));
+                    Thread.Sleep(2000);
                 }
                 catch (System.IO.IOException ex_io)
                 {
                     OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11011514, string.Format("Das Modem konnte nicht an COM-Port {0} erreicht werden. \r\n{1}\r\n{2}", CurrentComPortName, ex_io.GetType(), ex_io.Message)));
+                    Thread.Sleep(2000);
                 }
 
                 if (port == null) Thread.Sleep(2000);
@@ -181,8 +184,8 @@ namespace MelBoxGsm
                     Thread.Sleep(200);
                     if (Port != null)
                     {
-                        Port.DiscardInBuffer();
-                        Port.DiscardOutBuffer();
+                        //Port.DiscardInBuffer();
+                        //Port.DiscardOutBuffer();
                         string command = ATCommandQueue.FirstOrDefault();
                         Port.Write(command + "\r");
                         ATCommandQueue.Remove(command);

@@ -184,8 +184,7 @@ namespace MelBoxGsm
                     Thread.Sleep(200);
                     if (Port != null)
                     {
-                        //Port.DiscardInBuffer();
-                        //Port.DiscardOutBuffer();
+                        if (Port.CDHolding == false) ConnectPort();                        
                         string command = ATCommandQueue.FirstOrDefault();
                         Port.Write(command + "\r");
                         ATCommandQueue.Remove(command);

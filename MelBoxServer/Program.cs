@@ -1,15 +1,25 @@
 ﻿using System;
 
+
 namespace MelBoxServer
 {
     partial class Program
     {
         static void Main()
         {
-            MelBoxPipe.PipeServer melBoxPipe = new MelBoxPipe.PipeServer();
-            melBoxPipe.RaisePipeRecEvent += HandlePipeRecEvent;
+            //MelBoxPipe.PipeServer melBoxPipe = new MelBoxPipe.PipeServer();
+            //melBoxPipe.RaisePipeRecEvent += HandlePipeRecEvent;
 
-            MelBoxPipe.PipeServer.Out = "Test an Pipe Client";
+
+            MelBoxPipe.MelBoxPipe melBoxPipe = new MelBoxPipe.MelBoxPipe();
+            melBoxPipe.RaisePipeRecEvent += HandlePipeRecEvent;
+            melBoxPipe.ListenToPipe();
+            melBoxPipe.SendToPipe("Ich sende jetzt was");
+
+            for (int i = 0; i < 7; i++)
+            {
+                melBoxPipe.SendToPipe("und noch was..");
+            }
 
             MelBoxGsm.Gsm gsm = new MelBoxGsm.Gsm();
             gsm.RaiseGsmFatalErrorEvent += HandleGsmFatalErrorEvent;

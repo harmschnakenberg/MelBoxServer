@@ -94,5 +94,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MelBoxPipe\MelBoxPipe.csproj">
+      <Project>{2EF40402-5207-485D-82CA-0FB76FEEDC1A}</Project>
+      <Name>MelBoxPipe</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

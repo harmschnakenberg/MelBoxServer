@@ -5,16 +5,16 @@ namespace MelBoxServer
 {
     partial class Program
 	{
-		static void HandlePipeRecEvent(object sender, MelBoxPipe.PipeEventArgs e)
+        static void HandlePipeRecEvent(object sender, string e)
         {
-			Console.BackgroundColor = ConsoleColor.Yellow;
-			Console.ForegroundColor = ConsoleColor.DarkGreen;
-			Console.WriteLine("Pipe IN: " + e.In);
-			Console.ForegroundColor = ConsoleColor.Gray;
-			Console.BackgroundColor = ConsoleColor.Black;
-		}
+            Console.BackgroundColor = ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine("Pipe IN: " + e);
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.BackgroundColor = ConsoleColor.Black;
+        }
 
-		static void HandleGsmFatalErrorEvent(object sender, GsmEventArgs e)
+        static void HandleGsmFatalErrorEvent(object sender, GsmEventArgs e)
 		{
 			//Fehlermeldung bei der Kommunikation mit dem COM-Port = Programmabbruch
 			Console.BackgroundColor = ConsoleColor.DarkRed;

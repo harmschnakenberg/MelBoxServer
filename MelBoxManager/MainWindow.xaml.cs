@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MelBoxPipe;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,20 @@ namespace MelBoxManager
         public MainWindow()
         {
             InitializeComponent();
+            MelBoxPipe.MelBoxPipe pipe = new MelBoxPipe.MelBoxPipe();
+            pipe.PipeNameOut = "Client";
+            pipe.PipeNameIn = "Server";
+
+            MelBoxPipe.MelBoxPipe melBoxPipe = new MelBoxPipe.MelBoxPipe();
+            melBoxPipe.RaisePipeRecEvent += HandlePipeRecEvent;
+            melBoxPipe.ListenToPipe();
         }
+
+        void HandlePipeRecEvent(object sender, string e)
+        {
+            ListBox1.Items.Add(e);
+        }
+
     }
 }
 

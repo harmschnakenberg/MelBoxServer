@@ -49,7 +49,8 @@ namespace MelBoxGsm
 		/// <param name="e"></param>
 		protected virtual void OnRaiseGsmRecEvent(GsmEventArgs e)
 		{
-			RaiseGsmRecEvent?.Invoke(this, e);
+			
+            RaiseGsmRecEvent?.Invoke(this, e);
 		}
 
         /// <summary>

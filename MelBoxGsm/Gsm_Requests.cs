@@ -8,7 +8,7 @@ namespace MelBoxGsm
        
         private void SetupGsm()
         {
-            RaiseGsmRecEvent += InterpretGsmRecEvent;
+            RaiseGsmSystemEvent += InterpretGsmRecEvent;
 
             //Textmode
             AddAtCommand("AT+CMGF=1");
@@ -90,7 +90,7 @@ namespace MelBoxGsm
         /// <param name="smsId">Id der SMS im GSM-Speicher</param>
         private void SmsDelete(int smsId)
         {
-            OnRaiseGsmSystemEvent(new GsmEventArgs(11111726, "Die SMS mit der Id " + smsId + " wird gelöscht."));
+            OnRaiseGsmSystemEvent(new GsmEventArgs(11111726, GsmEventArgs.Telegram.SmsStatus, "Die SMS mit der Id " + smsId + " wird gelöscht."));
 
             string cmd = "AT+CMGD=" + smsId;
             if (ATCommandQueue.Contains(cmd)) return;

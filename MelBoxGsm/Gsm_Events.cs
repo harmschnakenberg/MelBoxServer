@@ -24,48 +24,6 @@ namespace MelBoxGsm
 			RaiseGsmSystemEvent?.Invoke(this, e);
 		}
 
-		/// <summary>
-		/// Event 'string gesendet an COM'
-		/// </summary>
-		public event EventHandler<GsmEventArgs> RaiseGsmSentEvent;
-
-		/// <summary>
-		/// Triggert das Event 'string gesendet an COM'
-		/// </summary>
-		/// <param name="e"></param>
-		protected virtual void OnRaiseGsmSentEvent(GsmEventArgs e)
-		{
-			RaiseGsmSentEvent?.Invoke(this, e);
-		}
-
-		/// <summary>
-		/// Event 'string empfangen von COM'
-		/// </summary>
-		public event EventHandler<GsmEventArgs> RaiseGsmRecEvent;
-
-		/// <summary>
-		/// Triggert das Event 'string empfangen von COM'
-		/// </summary>
-		/// <param name="e"></param>
-		protected virtual void OnRaiseGsmRecEvent(GsmEventArgs e)
-		{
-			
-            RaiseGsmRecEvent?.Invoke(this, e);
-		}
-
-        /// <summary>
-        /// Event 'string empfangen von COM'
-        /// </summary>
-        public event EventHandler<GsmEventArgs> RaiseGsmFatalErrorEvent;
-
-        /// <summary>
-        /// Triggert das Event 'string empfangen von COM'
-        /// </summary>
-        /// <param name="e"></param>
-        protected virtual void OnRaiseGsmFatalErrorEvent(GsmEventArgs e)
-        {
-            RaiseGsmFatalErrorEvent?.Invoke(this, e);
-        }
         #endregion
 
         #region Public Advanced Gsm Events
@@ -117,8 +75,8 @@ namespace MelBoxGsm
         internal void Port_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
         {
             Console.WriteLine("Fehler von COM-Port: " + e.EventType);
-            OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11211443, "Fehler von COM-Port: " + e.EventType));
-            ClosePort();
+            OnRaiseGsmSystemEvent(new GsmEventArgs(11211443, GsmEventArgs.Telegram.GsmError, "Fehler von COM-Port: " + e.EventType));
+            //ClosePort(); Böse?!
         }
 
         //Receive data from port
@@ -132,11 +90,11 @@ namespace MelBoxGsm
             //if ((answer.Length == 0) || ((!answer.EndsWith("\r\n> ")) && (!answer.EndsWith("\r\nOK\r\n"))))
             if (answer.Contains("ERROR"))
             {
-                OnRaiseGsmSystemEvent(new GsmEventArgs(11021909, "Fehlerhaft Empfangen:\n\r" + answer));
+                OnRaiseGsmSystemEvent(new GsmEventArgs(11021909, GsmEventArgs.Telegram.GsmError, "Fehlerhaft Empfangen:\n\r" + answer));
             }
 
             //Send data to whom ever interested
-            OnRaiseGsmRecEvent(new GsmEventArgs(11051044, answer));
+            OnRaiseGsmSystemEvent(new GsmEventArgs(11051044, GsmEventArgs.Telegram.GsmRec, answer));
 
             //Interpretiere das empfangene auf verwertbare Inhalte
             //InterpretGsmRecEvent(null, new GsmEventArgs(111816464, answer));
@@ -162,12 +120,12 @@ namespace MelBoxGsm
             }
             catch (TimeoutException ex_time)
             {
-                OnRaiseGsmSystemEvent(new GsmEventArgs(11061406, string.Format("Der Port {0} konnte nicht erreicht werden. Timeout. \r\n{1}\r\n{2}", CurrentComPortName, ex_time.GetType(), ex_time.Message)));
+                OnRaiseGsmSystemEvent(new GsmEventArgs(11061406, GsmEventArgs.Telegram.GsmError, string.Format("Der Port {0} konnte nicht erreicht werden. Timeout. \r\n{1}\r\n{2}", CurrentComPortName, ex_time.GetType(), ex_time.Message)));
                 return string.Empty;
             }
             catch (InvalidOperationException ex_op)
             {
-                OnRaiseGsmSystemEvent(new GsmEventArgs(11061406, string.Format("Der Port {0} ist geschlossen \r\n{1}", CurrentComPortName, ex_op.Message)));
+                OnRaiseGsmSystemEvent(new GsmEventArgs(11061406, GsmEventArgs.Telegram.GsmError, string.Format("Der Port {0} ist geschlossen \r\n{1}", CurrentComPortName, ex_op.Message)));
                 return string.Empty;
             }
             catch (Exception ex)
@@ -177,6 +135,8 @@ namespace MelBoxGsm
         }
 
         #endregion
+
+
     }
 
     /// <summary>
@@ -184,13 +144,28 @@ namespace MelBoxGsm
     /// </summary>
     public class GsmEventArgs : EventArgs
 	{
-		public GsmEventArgs(uint id, string message)
+        public enum Telegram
+        {
+            GsmError,
+            GsmSystem,
+            GsmRec,
+            GsmSent,
+            SmsRec,
+            SmsStatus,
+            SmsSent
+        }
+
+        public GsmEventArgs(uint id, Telegram type, string message)
 		{
 			Id = id;
+            Type = type;
 			Message = message;
 		}
 
-		public uint Id { get; set; }
+        public Telegram Type { get; set; }
+
+        public uint Id { get; set; }
+
 		public string Message { get; set; }
 	}
 }

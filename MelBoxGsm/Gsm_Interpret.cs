@@ -13,13 +13,15 @@ namespace MelBoxGsm
         /// <param name="e"></param>
         void InterpretGsmRecEvent(object sender, GsmEventArgs e)
         {
+            if (e.Type != GsmEventArgs.Telegram.GsmRec) return;
+
             string input = e.Message;
 
             if (input.Contains("AT^SCID"))
             {
                 if (input.Contains("ERROR"))
                 {
-                    OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11211523, "Es wurde keine SIM-Karte im GSM-Modem erkannt."));
+                    OnRaiseGsmSystemEvent(new GsmEventArgs(11211523, GsmEventArgs.Telegram.GsmError, "Es wurde keine SIM-Karte im GSM-Modem erkannt."));
                 }
             } 
 
@@ -27,7 +29,7 @@ namespace MelBoxGsm
             {
                 if (input.Contains("+CREG: 0,0"))
                 {
-                    OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11211540, "Das GSM-Modem ist nicht im Mobilfunknetz angemeldet."));
+                    OnRaiseGsmSystemEvent(new GsmEventArgs(11211540, GsmEventArgs.Telegram.GsmError, "Das GSM-Modem ist nicht im Mobilfunknetz angemeldet."));
                 }
             }
 
@@ -125,7 +127,7 @@ namespace MelBoxGsm
                 return;
             int.TryParse(strResp2, out int IdNewMsg);
 
-            OnRaiseGsmSystemEvent(new GsmEventArgs(11181057, "Stausreport empfangen mit Index " + IdNewMsg));
+            OnRaiseGsmSystemEvent(new GsmEventArgs(11181057, GsmEventArgs.Telegram.SmsStatus, "Stausreport empfangen mit Index " + IdNewMsg));
             //Lese neue Nachricht(en) [CMGL, damit in Antwort Index mitgelesen wird]
             AddAtCommand("AT+CMGL=\"REC UNREAD\"");
         }
@@ -138,7 +140,7 @@ namespace MelBoxGsm
                 return;
             int.TryParse(strResp2, out int IdNewMsg);
 
-            OnRaiseGsmSystemEvent(new GsmEventArgs(11181057, "Neue SMS empfangen mit Index " + IdNewMsg));
+            OnRaiseGsmSystemEvent(new GsmEventArgs(11181057, GsmEventArgs.Telegram.SmsRec, "Neue SMS empfangen mit Index " + IdNewMsg));
             //Lese neue Nachricht(en) [CMGL, damit in Antwort Index mitgelesen wird]
             AddAtCommand("AT+CMGL=\"REC UNREAD\"");
         }

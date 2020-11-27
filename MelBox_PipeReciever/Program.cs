@@ -7,25 +7,30 @@ using System.Threading.Tasks;
 namespace MelBox_PipeReciever
 {
     //Testprogramm für Pipes
+
+   
     class Program
     {
+        internal static MelBoxPipe.MelBoxPipe PipeIn = new MelBoxPipe.MelBoxPipe();
+        internal static MelBoxPipe.MelBoxPipe PipeOut = new MelBoxPipe.MelBoxPipe();
+
+        internal static string Pipe1 = "ToManager";
+        internal static string Pipe2 = "ToServer";
+
         static void Main(string[] args)
         {
-            string Pipe1 = "A";
-            string Pipe2 = "B";
 
-            MelBoxPipe.MelBoxPipe PipeNameIn = new MelBoxPipe.MelBoxPipe();
-            PipeNameIn.RaisePipeRecEvent += HandlePipeRecEvent;
-            PipeNameIn.ListenToPipe(Pipe1);
+            PipeIn.RaisePipeRecEvent += HandlePipeRecEvent;
+            PipeIn.ListenToPipe(Pipe1);
 
-            MelBoxPipe.MelBoxPipe melBoxPipe2 = new MelBoxPipe.MelBoxPipe();
+            
             Console.WriteLine("Press ESC to stop");
             do
             {
                 while (!Console.KeyAvailable)
                 {
-                    melBoxPipe2.SendToPipe(Pipe2, Pipe2 + ": " + DateTime.Now.ToShortTimeString());
-                    System.Threading.Thread.Sleep(2000);
+                    PipeOut.SendToPipe(Pipe2, Pipe2 + ": " + DateTime.Now.ToShortTimeString());
+                    System.Threading.Thread.Sleep(10000);
                 }
             } while (Console.ReadKey(true).Key != ConsoleKey.Escape);
 

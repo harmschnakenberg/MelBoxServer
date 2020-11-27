@@ -66,7 +66,7 @@ namespace MelBoxGsm
 
             if (AvailableComPorts.Count < 1)
             {
-                OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11011512, "Es sind keine COM-Ports vorhanden"));
+                OnRaiseGsmSystemEvent(new GsmEventArgs(11011512, GsmEventArgs.Telegram.GsmError, "Es sind keine COM-Ports vorhanden"));
                 return;
             }
 
@@ -85,13 +85,13 @@ namespace MelBoxGsm
 
             #region Verbinde ComPort
 
-            OnRaiseGsmSystemEvent(new GsmEventArgs(11051108, string.Format("Öffne Port {0}...", CurrentComPortName)));
+            OnRaiseGsmSystemEvent(new GsmEventArgs(11051108, GsmEventArgs.Telegram.GsmSystem, string.Format("Öffne Port {0}...", CurrentComPortName)));
 
             SerialPort port = new SerialPort();
 
             while (port == null || !port.IsOpen)
             {
-
+                currentConnectTrys++;
                 try
                 {
                     port.PortName = CurrentComPortName;                     //COM1
@@ -108,36 +108,36 @@ namespace MelBoxGsm
                     port.DtrEnable = true;
                     port.RtsEnable = true;
 
-                    if (currentConnectTrys++ > maxConnectTrys)
+                    if (currentConnectTrys > maxConnectTrys)
                     {
-                        OnRaiseGsmSystemEvent(new GsmEventArgs(11061519, "Maximale Anzahl Verbindungsversuche zu " + CurrentComPortName + " überschritten."));
+                        OnRaiseGsmSystemEvent(new GsmEventArgs(11061519, GsmEventArgs.Telegram.GsmError ,"Maximale Anzahl Verbindungsversuche zu " + CurrentComPortName + " überschritten."));
                         return;
                     }
                     else
                     {
-                        OnRaiseGsmSystemEvent(new GsmEventArgs(11061554, "Verbindungsversuch " + currentConnectTrys + " von " + maxConnectTrys));
+                        OnRaiseGsmSystemEvent(new GsmEventArgs(11061554, GsmEventArgs.Telegram.GsmSystem, "Verbindungsversuch " + currentConnectTrys + " von " + maxConnectTrys));
                     }
                 }
                 catch (ArgumentException ex_arg)
                 {
-                    OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11011514, string.Format("COM-Port {0} konnte nicht verbunden werden. \r\n{1}\r\n{2}", CurrentComPortName, ex_arg.GetType(), ex_arg.Message)));
+                    OnRaiseGsmSystemEvent(new GsmEventArgs(11011514, GsmEventArgs.Telegram.GsmError, string.Format("COM-Port {0} konnte nicht verbunden werden. \r\n{1}\r\n{2}", CurrentComPortName, ex_arg.GetType(), ex_arg.Message)));
                     Thread.Sleep(2000);
                 }
                 catch (UnauthorizedAccessException ex_unaut)
                 {
-                    OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11011514, string.Format("Der Zugriff auf COM-Port {0} wurde verweigert. \r\n{1}\r\n{2}", CurrentComPortName, ex_unaut.GetType(), ex_unaut.Message)));
+                    OnRaiseGsmSystemEvent(new GsmEventArgs(11011514, GsmEventArgs.Telegram.GsmError, string.Format("Der Zugriff auf COM-Port {0} wurde verweigert. \r\n{1}\r\n{2}", CurrentComPortName, ex_unaut.GetType(), ex_unaut.Message)));
                     Thread.Sleep(2000);
                 }
                 catch (System.IO.IOException ex_io)
                 {
-                    OnRaiseGsmFatalErrorEvent(new GsmEventArgs(11011514, string.Format("Das Modem konnte nicht an COM-Port {0} erreicht werden. \r\n{1}\r\n{2}", CurrentComPortName, ex_io.GetType(), ex_io.Message)));
+                    OnRaiseGsmSystemEvent(new GsmEventArgs(11011514, GsmEventArgs.Telegram.GsmError, string.Format("Das Modem konnte nicht an COM-Port {0} erreicht werden. \r\n{1}\r\n{2}", CurrentComPortName, ex_io.GetType(), ex_io.Message)));
                     Thread.Sleep(2000);
                 }
 
-                if (port == null) Thread.Sleep(2000);
+                if (port == null || !port.IsOpen) Thread.Sleep(2000);
 
             }
-            currentConnectTrys = 0;
+            //currentConnectTrys = 0;
 
             Port = port;
             #endregion
@@ -148,7 +148,7 @@ namespace MelBoxGsm
         {
             if (Port == null) return;
 
-            OnRaiseGsmSystemEvent(new GsmEventArgs(11011917, "Port " + Port.PortName + " wird geschlossen.\r\n"));
+            OnRaiseGsmSystemEvent(new GsmEventArgs(11011917, GsmEventArgs.Telegram.GsmSystem, "Port " + Port.PortName + " wird geschlossen.\r\n"));
             try
             {
                 Port.Close();
@@ -184,26 +184,26 @@ namespace MelBoxGsm
                     Thread.Sleep(200);
                     if (Port != null)
                     {
-                        if (Port.CDHolding == false) ConnectPort();                        
+                        //if (Port.CDHolding == false) ConnectPort();                        
                         string command = ATCommandQueue.FirstOrDefault();
                         Port.Write(command + "\r");
                         ATCommandQueue.Remove(command);
-                        OnRaiseGsmSentEvent(new GsmEventArgs(11051045, command));
+                        OnRaiseGsmSystemEvent(new GsmEventArgs(11051045, GsmEventArgs.Telegram.GsmSent, command));
                         Thread.Sleep(400);
                     }
                 }
             }
             catch (System.IO.IOException ex_io)
             {
-                OnRaiseGsmSystemEvent(new GsmEventArgs(11021909, ex_io.Message));
+                OnRaiseGsmSystemEvent(new GsmEventArgs(11021909, GsmEventArgs.Telegram.GsmError, ex_io.Message));
             }
             catch (InvalidOperationException ex_inval)
             {
-                OnRaiseGsmSystemEvent(new GsmEventArgs(11061455, ex_inval.Message));
+                OnRaiseGsmSystemEvent(new GsmEventArgs(11061455, GsmEventArgs.Telegram.GsmError, ex_inval.Message));
             }
             catch (UnauthorizedAccessException ex_unaut)
             {
-                OnRaiseGsmSystemEvent(new GsmEventArgs(11021910, ex_unaut.Message));
+                OnRaiseGsmSystemEvent(new GsmEventArgs(11021910, GsmEventArgs.Telegram.GsmError, ex_unaut.Message));
             }
 
         }

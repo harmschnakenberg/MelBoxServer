@@ -5,33 +5,33 @@ namespace MelBoxServer
 {
     partial class Program
     {
+        internal static MelBoxPipe.MelBoxPipe PipeIn = new MelBoxPipe.MelBoxPipe();
+        internal static MelBoxPipe.MelBoxPipe PipeOut = new MelBoxPipe.MelBoxPipe();
+
+        internal static string Pipe1 = "ToServer";
+        internal static string Pipe2 = "ToManager";
         static void Main()
         {
-            string Pipe1 = "A";
-            string Pipe2 = "B";
-
-            MelBoxPipe.MelBoxPipe PipeIn = new MelBoxPipe.MelBoxPipe();
             PipeIn.RaisePipeRecEvent += HandlePipeRecEvent;
-            PipeIn.ListenToPipe(Pipe2);
+            PipeIn.ListenToPipe(Pipe1);
            
-            MelBoxPipe.MelBoxPipe melBoxPipe2 = new MelBoxPipe.MelBoxPipe();
-            Console.WriteLine("Press ESC to stop");
-            do
-            {
-                while (!Console.KeyAvailable)
-                {
-                    melBoxPipe2.SendToPipe(Pipe1, Pipe1 + ": " + DateTime.Now.ToShortTimeString());
-                    System.Threading.Thread.Sleep(2000);
-                }
-            } while (Console.ReadKey(true).Key != ConsoleKey.Escape);
+            //Console.WriteLine("Press ESC to stop");
+            //do
+            //{
+            //    while (!Console.KeyAvailable)
+            //    {
+            //        PipeOut.SendToPipe(Pipe2, Pipe2 + ": " + DateTime.Now.ToShortTimeString());
+            //        System.Threading.Thread.Sleep(2000);
+            //    }
+            //} while (Console.ReadKey(true).Key != ConsoleKey.Escape);
 
 
 
             MelBoxGsm.Gsm gsm = new MelBoxGsm.Gsm();
-            gsm.RaiseGsmFatalErrorEvent += HandleGsmFatalErrorEvent;
+            //gsm.RaiseGsmFatalErrorEvent += HandleGsmFatalErrorEvent;
             gsm.RaiseGsmSystemEvent += HandleGsmSystemEvent;
-            gsm.RaiseGsmSentEvent += HandleGsmSentEvent;
-            gsm.RaiseGsmRecEvent += HandleGsmRecEvent;
+            //gsm.RaiseGsmSentEvent += HandleGsmSentEvent;
+            //gsm.RaiseGsmRecEvent += HandleGsmRecEvent;
             gsm.RaiseSmsStatusreportEvent += HandleSmsStatusReportEvent;
             gsm.RaiseSmsRecievedEvent += HandleSmsRecievedEvent;
             gsm.RaiseSmsSentEvent += HandleSmsSentEvent;

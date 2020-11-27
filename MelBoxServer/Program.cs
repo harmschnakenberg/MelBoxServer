@@ -7,19 +7,25 @@ namespace MelBoxServer
     {
         static void Main()
         {
-            //MelBoxPipe.PipeServer melBoxPipe = new MelBoxPipe.PipeServer();
-            //melBoxPipe.RaisePipeRecEvent += HandlePipeRecEvent;
+            string Pipe1 = "A";
+            string Pipe2 = "B";
 
-
-            MelBoxPipe.MelBoxPipe melBoxPipe = new MelBoxPipe.MelBoxPipe();
-            melBoxPipe.RaisePipeRecEvent += HandlePipeRecEvent;
-            melBoxPipe.ListenToPipe();
-            melBoxPipe.SendToPipe("Ich sende jetzt was");
-
-            for (int i = 0; i < 7; i++)
+            MelBoxPipe.MelBoxPipe PipeIn = new MelBoxPipe.MelBoxPipe();
+            PipeIn.RaisePipeRecEvent += HandlePipeRecEvent;
+            PipeIn.ListenToPipe(Pipe2);
+           
+            MelBoxPipe.MelBoxPipe melBoxPipe2 = new MelBoxPipe.MelBoxPipe();
+            Console.WriteLine("Press ESC to stop");
+            do
             {
-                melBoxPipe.SendToPipe("und noch was..");
-            }
+                while (!Console.KeyAvailable)
+                {
+                    melBoxPipe2.SendToPipe(Pipe1, Pipe1 + ": " + DateTime.Now.ToShortTimeString());
+                    System.Threading.Thread.Sleep(2000);
+                }
+            } while (Console.ReadKey(true).Key != ConsoleKey.Escape);
+
+
 
             MelBoxGsm.Gsm gsm = new MelBoxGsm.Gsm();
             gsm.RaiseGsmFatalErrorEvent += HandleGsmFatalErrorEvent;

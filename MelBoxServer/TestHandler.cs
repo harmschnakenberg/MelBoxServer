@@ -58,7 +58,7 @@ namespace MelBoxServer
 			Console.WriteLine(e.Id + ": " + e.Message);
 			Console.ForegroundColor = ConsoleColor.Gray;
 
-			PipeOut.SendToPipe(Pipe2, JSONSerialize(e));
+			PipeOut.SendToPipe(PipeNameOut, MelBoxGsm.Gsm.JSONSerialize(e));
 
 		}
 
@@ -89,7 +89,7 @@ namespace MelBoxServer
 			Console.WriteLine(string.Format("SMS {0} konnte {1} zugestellt werden:\r\nAn: +{2}\r\n{3}", e.LogSentId, e.SendStatus < 32 ? "erfolgreich" : "nicht", e.Phone, e.Phone));
 			Console.ForegroundColor = ConsoleColor.Gray;
 
-			PipeOut.SendToPipe(Pipe2, JSONSerialize(e));
+			PipeOut.SendToPipe(PipeNameOut, MelBoxGsm.Gsm.JSONSerialize(e));
 		}
 
 		static void HandleSmsRecievedEvent(object sender, Sms e)
@@ -100,7 +100,7 @@ namespace MelBoxServer
 			Console.ForegroundColor = ConsoleColor.Gray;
 
 			//TODO: Neue Nachricht in DB eintragen, Weiterleitung triggern
-			PipeOut.SendToPipe(Pipe2, JSONSerialize(e));
+			PipeOut.SendToPipe(PipeNameOut, MelBoxGsm.Gsm.JSONSerialize(e));
 		}
 
 		static void HandleSmsSentEvent(object sender, Sms e)
@@ -110,7 +110,7 @@ namespace MelBoxServer
 			Console.WriteLine("SMS versendet:\r\n+" + e.Phone + ": " + e.Content);
 			Console.ForegroundColor = ConsoleColor.Gray;
 
-			PipeOut.SendToPipe(Pipe2, JSONSerialize(e));
+			PipeOut.SendToPipe(PipeNameOut, MelBoxGsm.Gsm.JSONSerialize(e));
 		}
 	}
 }

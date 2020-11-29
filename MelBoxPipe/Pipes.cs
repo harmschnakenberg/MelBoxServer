@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MelBoxPipe
 {
@@ -15,7 +16,7 @@ namespace MelBoxPipe
 
         public void SendToPipe(string pipeName, string sendString)
         {
-            Console.WriteLine(pipeName + " Sendeversuch: " + sendString);
+            Console.WriteLine("# " + pipeName + " Sendeversuch: " + sendString);
             Task.Run(() =>
             {
 
@@ -54,6 +55,7 @@ namespace MelBoxPipe
 
         public void ListenToPipe(string pipeName)
         {
+
             Task.Run(() =>
             {
                 try
@@ -62,6 +64,10 @@ namespace MelBoxPipe
                     Action<NamedPipeServerStream> a = CallBack;
                     a.BeginInvoke(s, ar => { }, null);
                     OnRaisePipeRecEvent("Horche auf '" + pipeName + "'");
+                }
+                catch (SystemException ex_sys)
+                {
+                    OnRaisePipeRecEvent("PipeCreateServer: " + ex_sys.Message + "\r\n" + ex_sys.InnerException + "\r\n" + ex_sys.StackTrace);
                 }
                 catch (Exception ex)
                 {

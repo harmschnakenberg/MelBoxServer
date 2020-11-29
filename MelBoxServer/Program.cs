@@ -8,25 +8,14 @@ namespace MelBoxServer
         internal static MelBoxPipe.MelBoxPipe PipeIn = new MelBoxPipe.MelBoxPipe();
         internal static MelBoxPipe.MelBoxPipe PipeOut = new MelBoxPipe.MelBoxPipe();
 
-        internal static string Pipe1 = "ToServer";
-        internal static string Pipe2 = "ToManager";
+        internal static string PipeNameIn = "ToServer";
+        internal static string PipeNameOut = "ToManager";
+
         static void Main()
         {
             PipeIn.RaisePipeRecEvent += HandlePipeRecEvent;
-            PipeIn.ListenToPipe(Pipe1);
-           
-            //Console.WriteLine("Press ESC to stop");
-            //do
-            //{
-            //    while (!Console.KeyAvailable)
-            //    {
-            //        PipeOut.SendToPipe(Pipe2, Pipe2 + ": " + DateTime.Now.ToShortTimeString());
-            //        System.Threading.Thread.Sleep(2000);
-            //    }
-            //} while (Console.ReadKey(true).Key != ConsoleKey.Escape);
-
-
-
+            PipeIn.ListenToPipe(PipeNameIn);
+        
             MelBoxGsm.Gsm gsm = new MelBoxGsm.Gsm();
             //gsm.RaiseGsmFatalErrorEvent += HandleGsmFatalErrorEvent;
             gsm.RaiseGsmSystemEvent += HandleGsmSystemEvent;

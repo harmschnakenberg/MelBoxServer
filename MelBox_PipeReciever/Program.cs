@@ -14,14 +14,14 @@ namespace MelBox_PipeReciever
         internal static MelBoxPipe.MelBoxPipe PipeIn = new MelBoxPipe.MelBoxPipe();
         internal static MelBoxPipe.MelBoxPipe PipeOut = new MelBoxPipe.MelBoxPipe();
 
-        internal static string Pipe1 = "ToManager";
-        internal static string Pipe2 = "ToServer";
+        internal static string PipeNameIn = "ToManager";
+        internal static string PipeNameOut = "ToServer";
 
-        static void Main(string[] args)
+        static void Main()
         {
 
             PipeIn.RaisePipeRecEvent += HandlePipeRecEvent;
-            PipeIn.ListenToPipe(Pipe1);
+            PipeIn.ListenToPipe(PipeNameIn);
 
             
             Console.WriteLine("Press ESC to stop");
@@ -29,7 +29,7 @@ namespace MelBox_PipeReciever
             {
                 while (!Console.KeyAvailable)
                 {
-                    PipeOut.SendToPipe(Pipe2, Pipe2 + ": " + DateTime.Now.ToShortTimeString());
+                    PipeOut.SendToPipe(PipeNameOut, PipeNameOut + ": " + DateTime.Now.ToShortTimeString());
                     System.Threading.Thread.Sleep(10000);
                 }
             } while (Console.ReadKey(true).Key != ConsoleKey.Escape);

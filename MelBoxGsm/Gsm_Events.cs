@@ -155,6 +155,11 @@ namespace MelBoxGsm
             SmsSent
         }
 
+        public GsmEventArgs()
+        {
+            //Benötigt Für JSON Deserialisation
+        }
+
         public GsmEventArgs(uint id, Telegram type, string message)
 		{
 			Id = id;

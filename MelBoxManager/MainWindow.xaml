@@ -13,13 +13,20 @@
                 <Label>Test</Label>
                 <Button x:Name="myButton" Content="Click me" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Center" Width="75" Click="Button_Click"/>
             </StackPanel>
-            <ListBox x:Name="counterLabel" >
+            <ListBox >
                 <!--   <ListBox.ItemTemplate>
                     <DataTemplate>
                         <ContentControl TextBlock.Foreground="Black" />
                      
                     </DataTemplate>
                 </ListBox.ItemTemplate> -->
+            </ListBox>
+            <ListBox x:Name="counterLabel" ItemsSource="{Binding TrafficList}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Message}" Foreground="{Binding MessageColor}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
             </ListBox>
         </StackPanel>
     </Grid>

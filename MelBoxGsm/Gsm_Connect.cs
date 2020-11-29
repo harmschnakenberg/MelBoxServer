@@ -111,6 +111,8 @@ namespace MelBoxGsm
                     if (currentConnectTrys > maxConnectTrys)
                     {
                         OnRaiseGsmSystemEvent(new GsmEventArgs(11061519, GsmEventArgs.Telegram.GsmError ,"Maximale Anzahl Verbindungsversuche zu " + CurrentComPortName + " überschritten."));
+                        ClosePort();
+                        Environment.Exit(0);
                         return;
                     }
                     else
@@ -130,7 +132,7 @@ namespace MelBoxGsm
                 }
                 catch (System.IO.IOException ex_io)
                 {
-                    OnRaiseGsmSystemEvent(new GsmEventArgs(11011514, GsmEventArgs.Telegram.GsmError, string.Format("Das Modem konnte nicht an COM-Port {0} erreicht werden. \r\n{1}\r\n{2}", CurrentComPortName, ex_io.GetType(), ex_io.Message)));
+                    OnRaiseGsmSystemEvent(new GsmEventArgs(11011514, GsmEventArgs.Telegram.GsmError, string.Format("Verbindungsversuch {0}/{1}: COM-Port {2} konnte erreicht werden. \r\n{3}\r\n{4}", currentConnectTrys, MaxSendRetrys, CurrentComPortName, ex_io.GetType(), ex_io.Message)));
                     Thread.Sleep(2000);
                 }
 
@@ -181,10 +183,21 @@ namespace MelBoxGsm
             {
                 while (ATCommandQueue.Count > 0) //Abarbeitung nacheinander
                 {
-                    Thread.Sleep(200);
+                    //Thread.Sleep(200);
                     if (Port != null)
                     {
-                        //if (Port.CDHolding == false) ConnectPort();                        
+                        #region Warte mit Timeout auf letzte Antwort von GSM-Modem, bevor erneut gesendet wird
+                        int n = 0;
+                        while (!PermissionToSend && n < 100)
+                        {
+                            n++;
+                            Console.Write('.');
+                            System.Threading.Thread.Sleep(50);
+                        }
+                        Console.WriteLine();
+                        PermissionToSend = false;
+                        #endregion
+
                         string command = ATCommandQueue.FirstOrDefault();
                         Port.Write(command + "\r");
                         ATCommandQueue.Remove(command);

@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
+using static MelBoxGsm.GsmEventArgs;
 
 namespace MelBoxManager
 {
@@ -22,9 +24,9 @@ namespace MelBoxManager
         }
 
 
-        private BindingList<Tuple<string, string>> _TrafficList = new BindingList<Tuple<string, string>>();
+        private ObservableCollection<LogItem> _TrafficList = new ObservableCollection<LogItem>();
 
-        public BindingList<Tuple<string, string>> TrafficList
+        public ObservableCollection<LogItem> TrafficList
         {
             get { return _TrafficList; }
             set
@@ -34,7 +36,29 @@ namespace MelBoxManager
             }
         }
 
-
+        #region xxx
+        internal static SolidColorBrush GetColorFromTelegram(MelBoxGsm.GsmEventArgs Telegram)
+        {           
+            switch (Telegram.Type)
+            {
+                case MelBoxGsm.GsmEventArgs.Telegram.GsmError:
+                    return Brushes.Red;
+                case MelBoxGsm.GsmEventArgs.Telegram.GsmRec:
+                    return Brushes.Green;                    
+                case MelBoxGsm.GsmEventArgs.Telegram.GsmSent:
+                    return Brushes.Blue;                    
+                case MelBoxGsm.GsmEventArgs.Telegram.GsmSystem:
+                    return Brushes.DarkGray;                    
+                default:
+                    return Brushes.Black;                    
+            }
+        }
+        #endregion
     }
-    
+
+    public class LogItem
+    {
+        public string Message { get; set; }
+        public System.Windows.Media.Brush MessageColor { get; set; }
+    }
 }

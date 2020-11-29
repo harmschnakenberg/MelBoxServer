@@ -74,7 +74,7 @@ namespace MelBoxGsm
                 //Sendungsnachverfolgung
                 SmsQueue.Add(sms);
                 SetRetrySendSmsTimer();
-
+                
                 //Senden
                 AddAtCommand("AT+CMGS=\"+" + phone + "\"\r");
                 AddAtCommand(content + ctrlz);

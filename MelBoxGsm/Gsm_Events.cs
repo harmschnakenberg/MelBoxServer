@@ -9,6 +9,8 @@ namespace MelBoxGsm
 {
 	public partial class Gsm
 	{
+        static bool PermissionToSend = true;
+
         #region Public Basic Gsm Events
         /// <summary>
         /// Event 'System-Ereignis'
@@ -76,7 +78,7 @@ namespace MelBoxGsm
         {
             Console.WriteLine("Fehler von COM-Port: " + e.EventType);
             OnRaiseGsmSystemEvent(new GsmEventArgs(11211443, GsmEventArgs.Telegram.GsmError, "Fehler von COM-Port: " + e.EventType));
-            //ClosePort(); Böse?!
+            //ClosePort(); Böse!
         }
 
         //Receive data from port
@@ -92,12 +94,13 @@ namespace MelBoxGsm
             {
                 OnRaiseGsmSystemEvent(new GsmEventArgs(11021909, GsmEventArgs.Telegram.GsmError, "Fehlerhaft Empfangen:\n\r" + answer));
             }
+            else if (answer.Length > 1)
+            {
+                //Send data to whom ever interested
+                OnRaiseGsmSystemEvent(new GsmEventArgs(11051044, GsmEventArgs.Telegram.GsmRec, answer));
+            }
 
-            //Send data to whom ever interested
-            OnRaiseGsmSystemEvent(new GsmEventArgs(11051044, GsmEventArgs.Telegram.GsmRec, answer));
-
-            //Interpretiere das empfangene auf verwertbare Inhalte
-            //InterpretGsmRecEvent(null, new GsmEventArgs(111816464, answer));
+            PermissionToSend = true;
         }
 
         /// <summary>

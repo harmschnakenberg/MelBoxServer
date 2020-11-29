@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using System.Windows.Media;
+using static MelBoxGsm.GsmEventArgs;
 
 namespace MelBoxManager
 {
@@ -33,28 +35,35 @@ namespace MelBoxManager
             if (e.StartsWith("{"))
             {
                 MelBoxGsm.GsmEventArgs telegram = MelBoxGsm.Gsm.JSONDeserializeTelegram(e);
-                string msg = telegram.Message.Replace("\r\n\r\n", "\r\n");
+                char[] replace = { '\r', '\n' };
 
-                if (telegram.Type == MelBoxGsm.GsmEventArgs.Telegram.GsmSent)
+                LogItem log = new LogItem
                 {
-                    Dispatcher.Invoke(new Action(() =>
-                    var.TrafficList.Add(new Tuple<string, string>(msg, "sent"))
-                    ));
-                }
+                    //                    Message = telegram.Message.Replace("\r\r\n", "\r\n").Replace("\r\n\r\n", "\r\n").Trim("\r\n"),
+                    Message = telegram.Message.Trim(replace),
+                    MessageColor = Var.GetColorFromTelegram(telegram)
+                };
 
-                if (telegram.Type == MelBoxGsm.GsmEventArgs.Telegram.GsmRec)
-                {
-                    Dispatcher.Invoke(new Action(() =>
-                    var.TrafficList.Add(new Tuple<string, string>(msg, "rec"))
-                    ));
-                }
 
+                Dispatcher.Invoke(new Action(() =>
+                    var.TrafficList.Add(log))
+                );
             }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var.TrafficList.Add(new Tuple<string, string>(DateTime.Now.ToString(), "test"));
+            LogItem log = new LogItem
+            {
+                Message = DateTime.Now.ToString(),
+                MessageColor = Brushes.Chocolate
+            };
+
+            var.TrafficList.Add(log);
         }
+
+
     }
+
+
 }

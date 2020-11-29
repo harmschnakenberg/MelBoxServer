@@ -31,9 +31,19 @@ namespace MelBoxManager
             get { return _TrafficList; }
             set
             {
-                _TrafficList = value;
+                _TrafficList = value;                
                 OnPropertyChanged();
             }
+        }
+
+        public void AddToTrafficList(LogItem item)
+        {
+            while (TrafficList.Count > 16) // Max. 20 Einträge
+            {
+                TrafficList.RemoveAt(0);
+            }
+
+            TrafficList.Add(item);
         }
 
         #region xxx
@@ -59,6 +69,6 @@ namespace MelBoxManager
     public class LogItem
     {
         public string Message { get; set; }
-        public System.Windows.Media.Brush MessageColor { get; set; }
+        public Brush MessageColor { get; set; }
     }
 }

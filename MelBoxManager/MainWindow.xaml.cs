@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using System.Windows.Media;
-using static MelBoxGsm.GsmEventArgs;
+using MelBoxGsm;
 
 namespace MelBoxManager
 {
@@ -12,7 +12,7 @@ namespace MelBoxManager
     public partial class MainWindow : Window
     {
 
-        static Var var = new Var();
+        static readonly Var var = new Var();
 
         internal static MelBoxPipe.MelBoxPipe PipeIn = new MelBoxPipe.MelBoxPipe();
         internal static MelBoxPipe.MelBoxPipe PipeOut = new MelBoxPipe.MelBoxPipe();
@@ -34,20 +34,18 @@ namespace MelBoxManager
 
             if (e.StartsWith("{"))
             {
-                MelBoxGsm.GsmEventArgs telegram = MelBoxGsm.Gsm.JSONDeserializeTelegram(e);
+                GsmEventArgs telegram = Gsm.JSONDeserializeTelegram(e);
                 char[] replace = { '\r', '\n' };
 
                 LogItem log = new LogItem
                 {
-                    //                    Message = telegram.Message.Replace("\r\r\n", "\r\n").Replace("\r\n\r\n", "\r\n").Trim("\r\n"),
-                    Message = telegram.Message.Trim(replace),
+                    Message = telegram.Message.Replace("\r\n\r\n", "\r\n").Replace("\r\r\n", "\r\n").Trim(replace), //Zeilenumbrüche minimieren
                     MessageColor = Var.GetColorFromTelegram(telegram)
                 };
 
-
-                Dispatcher.Invoke(new Action(() =>
-                    var.TrafficList.Add(log))
-                );
+                Dispatcher.Invoke(new Action(() => //Dispatcher ist notwendig, um im UI-Thread ändern zu können.
+                     var.AddToTrafficList(log)
+                ));
             }
         }
 
@@ -59,7 +57,7 @@ namespace MelBoxManager
                 MessageColor = Brushes.Chocolate
             };
 
-            var.TrafficList.Add(log);
+            var.AddToTrafficList(log);
         }
 
 

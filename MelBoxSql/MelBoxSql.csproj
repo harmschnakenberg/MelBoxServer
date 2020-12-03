@@ -62,8 +62,11 @@
   <ItemGroup>
     <Compile Include="Sql_Connect.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sql_Delete.cs" />
+    <Compile Include="Sql_Helper.cs" />
     <Compile Include="Sql_Insert.cs" />
     <Compile Include="Sql_Select.cs" />
+    <Compile Include="Sql_Update.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

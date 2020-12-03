@@ -97,14 +97,14 @@ namespace MelBoxSql
         }
 
         /// <summary>
-        /// Schreibt eine neue Nachricht in die Datenbank.
-        /// Gibt die ID des INHALTS aus.
+        /// Schreibt den Empfang einer neuen Nachricht in die Datenbank.
+        /// Gibt die ID der Nachricht in der Empfangsliste aus.
         /// </summary>
         /// <param name="message"></param>
         /// <param name="phone"></param>
         /// <param name="email"></param>
-        /// <returns>ID für 'message'</returns>
-        public int InsertMessage(string message, ulong phone = 0, string email = "")
+        /// <returns>ID der Empfangenen Nachricht; Wenn nicht erfolgreich 0.</returns>
+        public int InsertRecMessage(string message, ulong phone = 0, string email = "")
         {
             int msgId;
             try
@@ -120,21 +120,35 @@ namespace MelBoxSql
 
                     var command = connection.CreateCommand();
                     command.CommandText = "INSERT INTO \"LogRecieved\" (\"RecieveTime\", \"FromContactId\", \"ContentId\") VALUES " +
-                                          "( CURRENT_TIMESTAMP, @fromContactId, @contentId );";
+                                          "( CURRENT_TIMESTAMP, @fromContactId, @contentId );" +
+                                          "SELECT Id FROM \"LogRecieved\" ORDER BY \"RecieveTime\" DESC LIMIT 1";
 
                     command.Parameters.AddWithValue("@fromContactId", senderId);
                     command.Parameters.AddWithValue("@contentId", msgId);
 
-                    command.ExecuteNonQuery();
+                    //command.ExecuteNonQuery();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            //Lese Eintrag
+                            if (int.TryParse(reader.GetString(0), out int recId))
+                            {
+                                Console.WriteLine("Neue SMS mit Empfangs-Id {0} gespeichert.", recId);
+                                return msgId;
+                            }
+                        }
+                    }
+
                 }
 
-                Console.WriteLine("Neue SMS mit Id {0} gespeichert.", msgId);
+                return 0;
             }
             catch (Exception ex)
             {
                 throw new Exception("InsertMessage()" + ex.GetType() + "\r\n" + ex.Message);
             }
-            return msgId;
+            
         }
 
         /// <summary>
@@ -177,7 +191,7 @@ namespace MelBoxSql
         /// <param name="startHour">Tagesstunde - Beginn der Sperre</param>
         /// <param name="endHour">Tagesstunde - Ende der Sperre</param>
         /// <param name="Days">Tage, an denen die Nachricht gesperrt sein soll, wie Wochenuhr; Mo=1, Di=2,...,Werktags=8, Alle Tage=9</param>
-        public void InsertBlockedMessage(int msgId, int days = 9, int startHour = 17, int endHour = 7)
+        public void InsertBlockedMessage(int msgId, byte blockedDays = 127, int startHour = 17, int endHour = 7)
         {
             try
             {
@@ -194,7 +208,7 @@ namespace MelBoxSql
                     command.Parameters.AddWithValue("@msgId", msgId);
                     command.Parameters.AddWithValue("@startHour", startHour);
                     command.Parameters.AddWithValue("@endHour", endHour);
-                    command.Parameters.AddWithValue("@days", days);
+                    command.Parameters.AddWithValue("@days", blockedDays);
 
                     command.ExecuteNonQuery();
                 }

@@ -15,6 +15,9 @@ namespace MelBoxServer
         {
             PipeIn.RaisePipeRecEvent += HandlePipeRecEvent;
             PipeIn.ListenToPipe(PipeNameIn);
+
+            MelBoxSql.MelBoxSql sql = new MelBoxSql.MelBoxSql();
+
         
             MelBoxGsm.Gsm gsm = new MelBoxGsm.Gsm();
             //gsm.RaiseGsmFatalErrorEvent += HandleGsmFatalErrorEvent;

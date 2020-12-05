@@ -146,7 +146,58 @@ namespace MelBoxSql
         // UpdateBlockedMessage
 
         // UpdateLogSent
+        /// <summary>
+        /// BAUSTELLE! Ändert Sendestatus im Sendeprotokoll
+        /// </summary>
+        /// <param name="contendId"></param>
+        /// <param name="sendToId"></param>
+        /// <param name="confirmStatus"></param>
+        public void UpdateLogSent(int contendId, int sendToId, int sendstatus)
+        {
 
-        // UpdateSmsSendStatus
+            try
+            {
+
+                using (var connection = new SqliteConnection(DataSource))
+                {
+                    connection.Open();
+
+                    var command = connection.CreateCommand();
+                    command.CommandText = "UPDATE \"LogSent\" SET \"ConfirmStatus\" = @confirmStatus FROM " +
+                                          "(SELECT * FROM \"LogSent\" " +
+                                          "WHERE \"LogRecievedId\" = @contendId AND \"SentToId\" = @sendToId " +
+                                          "ORDER BY \"SentTime\" DESC LIMIT 1);";
+
+                    command.Parameters.AddWithValue("@contendId", contendId);
+                    command.Parameters.AddWithValue("@sendToId", sendToId);
+                    command.Parameters.AddWithValue("@confirmStatus", sendstatus);
+
+                    command.ExecuteNonQuery();
+                    
+                }                
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Sql-Fehler UpdateLogSent()\r\n" + ex.GetType() + "\r\n" + ex.Message);
+            }
+        }
+
+
+        public void UpdateLogSent(ulong sentToPhone, string content, int sendStatus)
+        {
+
+            //ContendId herausfinden
+            int contendId = GetMessageId(content);
+
+            //EmpfängerId herausfinden
+            int sendToId = GetContactId("", sentToPhone);
+
+            if (contendId > 0 && sendToId > 0)
+            {
+                UpdateLogSent(contendId, sendToId, sendStatus);
+            }
+        }
+
+
     }
 }

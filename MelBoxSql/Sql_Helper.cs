@@ -79,7 +79,6 @@ namespace MelBoxSql
         /// <returns>KeyWords</returns>
         internal static string ExtractKeyWords(string MessageContent)
         {
-
             char[] split = new char[] { ' ', ',', '-', '.', ':', ';' };
             string[] words = MessageContent.Split(split);
 

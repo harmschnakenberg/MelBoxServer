@@ -19,29 +19,47 @@ namespace MelBoxSql
                 {
                     connection.Open();
 
-                    var command = connection.CreateCommand();
-                    command.CommandText = @"
+                    //Neuen Eintrag erstellen, wenn er nicht existiert
+                    var command1 = connection.CreateCommand();
+                    command1.CommandText = @"
+                                INSERT OR IGNORE INTO MessageContent (Content)
+                                VALUES ($Content);                                 
+                                ";
+
+                    command1.Parameters.AddWithValue("$Content", content).Size = 160; //Max. 160 Zeichen (oder Bytes?)
+                    command1.ExecuteNonQuery();
+
+
+                   // var command2 = connection.CreateCommand();
+                    command1.CommandText = @"
                     SELECT ID FROM MessageContent 
                     WHERE Content = $Content
                     ";
 
-                    command.Parameters.AddWithValue("$Content", content).Size = 160; //Max. 160 Zeichen (oder Bytes?)
+                    //using (var reader = command2.ExecuteReader())
+                    //{
+                        //if (!reader.HasRows)
+                        //{
+                        //    //Neuen Eintrag erstellen
+                        //    var command2 = connection.CreateCommand();
+                        //    command2.CommandText = @"
+                        //        INSERT INTO MessageContent (Content)
+                        //        SELECT ($Content);
+                        //        WHERE NOT EXISTS(SELECT 1 FROM MessageContent WHERE Content = $Content);
+                        //        ";
+                        //    //command.Parameters.AddWithValue("$name", name);
+                        //    command2.ExecuteNonQuery();
+                        //}
+                    //}
 
-                    using (var reader = command.ExecuteReader())
+                    using (var reader = command1.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             //Lese Eintrag
                             if (!int.TryParse(reader.GetString(0), out id))
                             {
-                                //Neuen Eintrag erstellen
-                                command.CommandText =
-                                @"
-                                INSERT INTO MessageContent (Content)
-                                VALUES ($Content);
-                                ";
-                                //command.Parameters.AddWithValue("$name", name);
-                                command.ExecuteNonQuery();
+                                
                                 //Neu erstellten Eintrag lesen
                                 id = GetMessageId(content);
                             }
@@ -79,19 +97,22 @@ namespace MelBoxSql
                 {
                     connection.Open();
 
+                    string keyWords = ExtractKeyWords(message);
+
                     var command = connection.CreateCommand();
                     command.CommandText = @"SELECT Id " +
                                             "FROM Contact " +
                                             "WHERE  " +
                                             "( length(Name) > 0 AND Name = @name ) " +
                                             "OR ( Phone > 0 AND Phone = @phone ) " +
-                                            "OR ( length(Email) > 0 AND Email = @email )" +
+                                            "OR ( length(Email) > 0 AND Email = @email ) " +
                                             "OR ( length(KeyWord) > 0 AND KeyWord = @keyWord ) ";
 
                     command.Parameters.AddWithValue("@name", name);
                     command.Parameters.AddWithValue("@phone", phone);
                     command.Parameters.AddWithValue("@email", email);
                     command.Parameters.AddWithValue("@message", message);
+                    command.Parameters.AddWithValue("@keyWord", keyWords);
 
                     using (var reader = command.ExecuteReader())
                     {

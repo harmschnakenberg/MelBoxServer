@@ -146,7 +146,7 @@ namespace MelBoxSql
             }
             catch (Exception ex)
             {
-                throw new Exception("InsertMessage()" + ex.GetType() + "\r\n" + ex.Message);
+                throw new Exception("InsertRecMessage()" + ex.GetType() + "\r\n" + ex.Message);
             }
             
         }
@@ -172,14 +172,14 @@ namespace MelBoxSql
 
                     command.Parameters.AddWithValue("@contactId", contactId);
                     command.Parameters.AddWithValue("@startTime", SqlTime(startTime));
-                    command.Parameters.AddWithValue("@startTime", SqlTime(endTime));
+                    command.Parameters.AddWithValue("@endTime", SqlTime(endTime));
 
                     command.ExecuteNonQuery();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new Exception("Sql-Fehler InsertShift()");
+                throw new Exception("Sql-Fehler InsertShift()" + ex.GetType() + "\r\n" + ex.Message);
             }
         }
 
@@ -251,7 +251,19 @@ namespace MelBoxSql
         }
 
 
+        public void InsertLogSent(ulong sentToPhone, string content)
+        {
+            //ContendId herausfinden
+            int contendId = GetMessageId(content);
 
+            //EmpfängerId herausfinden
+            int sendToId = GetContactId("", sentToPhone);
+
+            if (contendId > 0 && sendToId > 0)
+            {
+                InsertLogSent(contendId, sendToId, SendToWay.Sms);
+            }
+        }
 
     }
 }

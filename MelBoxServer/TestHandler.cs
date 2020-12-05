@@ -31,6 +31,7 @@ namespace MelBoxServer
             {
                 case GsmEventArgs.Telegram.GsmError:
 					Console.ForegroundColor = ConsoleColor.Red;
+					Sql.Log(MelBoxSql.MelBoxSql.LogTopic.Sms, MelBoxSql.MelBoxSql.LogPrio.Error, e.Message);
 					break;
                 case GsmEventArgs.Telegram.GsmSystem:
 					Console.ForegroundColor = ConsoleColor.Gray;
@@ -43,12 +44,15 @@ namespace MelBoxServer
 					break;
                 case GsmEventArgs.Telegram.SmsRec:
 					Console.ForegroundColor = ConsoleColor.Cyan;
+					Sql.Log(MelBoxSql.MelBoxSql.LogTopic.Sms, MelBoxSql.MelBoxSql.LogPrio.Info, "Empfangen:" + e.Message);
 					break;
                 case GsmEventArgs.Telegram.SmsStatus:
 					Console.ForegroundColor = ConsoleColor.DarkYellow;
+					Sql.Log(MelBoxSql.MelBoxSql.LogTopic.Sms, MelBoxSql.MelBoxSql.LogPrio.Info, "Status: " + e.Message);
 					break;
                 case GsmEventArgs.Telegram.SmsSent:
 					Console.ForegroundColor = ConsoleColor.DarkBlue;
+					Sql.Log(MelBoxSql.MelBoxSql.LogTopic.Sms, MelBoxSql.MelBoxSql.LogPrio.Info, "Gesendet: " + e.Message);
 					break;
                 default:
 					Console.ForegroundColor = ConsoleColor.White;
@@ -90,6 +94,8 @@ namespace MelBoxServer
 			Console.ForegroundColor = ConsoleColor.Gray;
 
 			PipeOut.SendToPipe(PipeNameOut, MelBoxGsm.Gsm.JSONSerialize(e));
+
+			Sql.UpdateLogSent(e.Phone, e.Content, e.SendStatus);
 		}
 
 		static void HandleSmsRecievedEvent(object sender, Sms e)
@@ -99,8 +105,10 @@ namespace MelBoxServer
 			Console.WriteLine("SMS empfangen:\r\n+" + e.Phone + ": " + e.Content);
 			Console.ForegroundColor = ConsoleColor.Gray;
 
-			//TODO: Neue Nachricht in DB eintragen, Weiterleitung triggern
 			PipeOut.SendToPipe(PipeNameOut, MelBoxGsm.Gsm.JSONSerialize(e));
+
+			//Neu empfangene Nachricht in DB eintragen:
+			Sql.InsertRecMessage(e.Content, e.Phone);
 		}
 
 		static void HandleSmsSentEvent(object sender, Sms e)
@@ -111,6 +119,8 @@ namespace MelBoxServer
 			Console.ForegroundColor = ConsoleColor.Gray;
 
 			PipeOut.SendToPipe(PipeNameOut, MelBoxGsm.Gsm.JSONSerialize(e));
+			//Neu gesendete Nachricht in DB eintragen:
+			Sql.InsertLogSent(e.Phone, e.Content);
 		}
 	}
 }

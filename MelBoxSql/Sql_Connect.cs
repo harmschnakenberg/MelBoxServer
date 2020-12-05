@@ -39,6 +39,9 @@ namespace MelBoxSql
             //Zeiten im Format TEXT (Lesbarkeit Rohdaten)
             using (var connection = new SqliteConnection(DataSource))
             {
+                SQLitePCL.Batteries.Init();
+                //SQLitePCL.raw.SetProvider(new  );
+
                 connection.Open();
 
                 List<String> TableCreateQueries = new List<string>
@@ -63,8 +66,8 @@ namespace MelBoxSql
                         "CREATE TABLE \"Shifts\"( \"Id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"EntryTime\" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
                         "\"ContactId\" INTEGER NOT NULL, \"StartTime\" TEXT NOT NULL, \"EndTime\" TEXT NOT NULL );",
 
-                        "CREATE TABLE \"BlockedMessages\"( \"Id\" INTEGER NOT NULL UNIQUE, \"EntryTime\" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, \"StartHour\" TEXT NOT NULL, " +
-                        "\"EndHour\" TEXT NOT NULL, \"Days\" INTEGER NOT NULL CHECK (\"Days\" < 10));"
+                        "CREATE TABLE \"BlockedMessages\"( \"Id\" INTEGER NOT NULL UNIQUE, \"EntryTime\" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, \"StartHour\" INTEGER NOT NULL, " +
+                        "\"EndHour\" INTEGER NOT NULL, \"Days\" INTEGER NOT NULL);"
                 };
 
                 foreach (string query in TableCreateQueries)

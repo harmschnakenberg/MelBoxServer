@@ -11,14 +11,13 @@ namespace MelBoxServer
         internal static string PipeNameIn = "ToServer";
         internal static string PipeNameOut = "ToManager";
 
+        internal static MelBoxSql.MelBoxSql Sql = new MelBoxSql.MelBoxSql();
+
         static void Main()
         {
             PipeIn.RaisePipeRecEvent += HandlePipeRecEvent;
             PipeIn.ListenToPipe(PipeNameIn);
 
-            MelBoxSql.MelBoxSql sql = new MelBoxSql.MelBoxSql();
-
-        
             MelBoxGsm.Gsm gsm = new MelBoxGsm.Gsm();
             //gsm.RaiseGsmFatalErrorEvent += HandleGsmFatalErrorEvent;
             gsm.RaiseGsmSystemEvent += HandleGsmSystemEvent;

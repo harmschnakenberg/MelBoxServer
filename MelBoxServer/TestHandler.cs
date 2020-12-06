@@ -107,8 +107,11 @@ namespace MelBoxServer
 
 			PipeOut.SendToPipe(PipeNameOut, MelBoxGsm.Gsm.JSONSerialize(e));
 
-			//Neu empfangene Nachricht in DB eintragen:
-			Sql.InsertRecMessage(e.Content, e.Phone);
+			//Neu empfangene Nachricht in DB eintragen, wenn nicht gesperrt an aktuelle Bereitschaft weiterleiten.
+			foreach (Tuple<ulong, string, int> tuple in Sql.SafeAndRelayNewMessage(e.Content, e.Phone))
+			{
+				Gsm.SmsSend(tuple.Item1, tuple.Item2, tuple.Item3);
+			}
 		}
 
 		static void HandleSmsSentEvent(object sender, Sms e)

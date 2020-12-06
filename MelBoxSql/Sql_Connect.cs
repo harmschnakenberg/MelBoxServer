@@ -64,10 +64,24 @@ namespace MelBoxSql
                         
                         //Bereitschaft
                         "CREATE TABLE \"Shifts\"( \"Id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"EntryTime\" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
-                        "\"ContactId\" INTEGER NOT NULL, \"StartTime\" TEXT NOT NULL, \"EndTime\" TEXT NOT NULL );",
+                        "\"ContactId\" INTEGER NOT NULL, \"StartTime\" TEXT NOT NULL, \"HoursDuration\" INTEGER NOT NULL );",
 
                         "CREATE TABLE \"BlockedMessages\"( \"Id\" INTEGER NOT NULL UNIQUE, \"EntryTime\" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, \"StartHour\" INTEGER NOT NULL, " +
-                        "\"EndHour\" INTEGER NOT NULL, \"Days\" INTEGER NOT NULL);"
+                        "\"EndHour\" INTEGER NOT NULL, \"Days\" INTEGER NOT NULL);",
+
+                        //Hilfstabelle
+                        "CREATE TABLE \"SendWay\" ( \"Way\" TEXT NOT NULL UNIQUE, \"Code\" INTEGER NOT NULL UNIQUE);",
+                        "INSERT INTO \"SendWay\" (\"Way\", \"Code\") VALUES ('undefiniert', " + (int)SendToWay.Undefined + ");",
+                        "INSERT INTO \"SendWay\" (\"Way\", \"Code\") VALUES ('SMS', " + (int)SendToWay.Sms + ");",
+                        "INSERT INTO \"SendWay\" (\"Way\", \"Code\") VALUES ('Email', " + (int)SendToWay.Email + ");",
+                        "INSERT INTO \"SendWay\" (\"Way\", \"Code\") VALUES ('Dummy', " + (int)SendToWay.None + ");",
+
+                        //Views
+                        "CREATE VIEW \"RecievedMessages\" AS SELECT r.Id As EmpfangNr, RecieveTime AS Empfangen, c.Name AS von, Content AS Inhalt " +
+                        "FROM LogRecieved AS r JOIN Contact AS c ON FromContactId = c.Id JOIN MessageContent AS m ON ContentId = m.Id",
+                        
+                        "CREATE VIEW \"SentMessages\" AS SELECT LogRecievedId As EmpfangNr, Content AS Inhalt, SentTime AS Gesendet, Name AS An, Way AS Medium, ConfirmStatus As Sendestatus " +
+                        "FROM LogSent AS ls JOIN Contact AS c ON SentToId =  c.Id JOIN SendWay AS sw ON c.SendWay = sw.Code JOIN LogRecieved AS lr ON lr.Id = ls.LogRecievedId JOIN MessageContent AS mc ON mc.id = lr.FromContactId"
                 };
 
                 foreach (string query in TableCreateQueries)
@@ -93,7 +107,7 @@ namespace MelBoxSql
 
                 InsertLogSent(1, 1, SendToWay.None);
 
-                InsertShift(2, DateTime.Now, DateTime.Now.AddDays(2));
+                InsertShift(2, DateTime.Now.Date.AddHours(-7), 10);
 
                 InsertBlockedMessage(1);
             }

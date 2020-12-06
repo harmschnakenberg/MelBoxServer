@@ -16,7 +16,7 @@ namespace MelBoxPipe
 
         public void SendToPipe(string pipeName, string sendString)
         {
-            Console.WriteLine("# " + pipeName + " Sendeversuch: " + sendString);
+            //Console.WriteLine("# " + pipeName + " Sendeversuch: " + sendString);
             Task.Run(() =>
             {
 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -203,7 +204,7 @@ namespace MelBoxSql
                 }
 
                 if (watch.Count == 0)
-                    throw new Exception(" GetCurrentShiftPhoneNumbers(): Es ist aktuell keine SMS-Bereitschaft definiert.");
+                    throw new Exception(" GetCurrentShiftPhoneNumbers(): Es ist aktuell keine SMS-Bereitschaft definiert."); //Exception? Muss anderweitig abgefangen werden.
 
                 return watch;
             }
@@ -260,5 +261,68 @@ namespace MelBoxSql
             }
         }
 
+        public bool IsMessageBlocked(string message)
+        {
+            int msgId = GetMessageId(message);
+            return IsMessageBlocked(msgId);
+        }
+
+        public DataTable GetRecMsgView()
+        {
+            DataTable recTable = new DataTable();
+
+            try
+            {
+                using (var connection = new SqliteConnection(DataSource))
+                {
+                    connection.Open();
+
+                    
+                    var command1 = connection.CreateCommand();
+                    
+                    command1.CommandText = "SELECT * FROM \"RecievedMessages\" ORDER BY Empfangen DESC LIMIT 1000";
+
+                    using (var reader = command1.ExecuteReader())
+                    {
+                        recTable.Load(reader);                       
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Sql-Fehler GetRecMsgView() " + ex.GetType() + "\r\n" + ex.Message);
+            }
+
+            return recTable;
+        }
+
+        public DataTable GetSentMsgView()
+        {
+            DataTable sentTable = new DataTable();
+
+            try
+            {
+                using (var connection = new SqliteConnection(DataSource))
+                {
+                    connection.Open();
+
+
+                    var command1 = connection.CreateCommand();
+
+                    command1.CommandText = "SELECT * FROM \"SentMessages\" ORDER BY Gesendet DESC LIMIT 1000";
+
+                    using (var reader = command1.ExecuteReader())
+                    {
+                        sentTable.Load(reader);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Sql-Fehler GetSentMsgView() " + ex.GetType() + "\r\n" + ex.Message);
+            }
+
+            return sentTable;
+        }
     }
 }

@@ -6,24 +6,96 @@
         xmlns:local="clr-namespace:MelBoxManager"
         mc:Ignorable="d"
         Title="MelBox Manager" Height="600" Width="800">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
 
-        <Label Grid.Column="0" >Test</Label>
-        <Button x:Name="myButton" Content="Click me" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Center" Width="75" Click="Button_Click"/>
+    <TabControl>
+        <TabItem Header="Life-Ticker">
+            <Grid Background="#FFE5E5E5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-        <ListBox Grid.Column="1" x:Name="counterLabel" ItemsSource="{Binding TrafficList}" Margin="10">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Message}" Foreground="{Binding MessageColor}"/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-    </Grid>
+                <StackPanel>
+                    <Label>Verbindung</Label>
+                    <WrapPanel>
+                        <Label>PipeIn</Label>
+                        <Label x:Name="Label_PipeIn">PipeIn</Label>
+                    </WrapPanel>
+                    <WrapPanel>
+                        <Label>PipeOut</Label>
+                        <Label x:Name="Label_PipeOut">PipeOut</Label>
+                    </WrapPanel>
+
+                    <Separator />
+                    <Label>Test</Label>
+                    <Button x:Name="myButton" Content="Click me" Click="Button_Click"/>
+                    <Separator />
+                    <Label>Funkverkehr</Label>
+                    <CheckBox x:Name="CheckBox_ShowEventGsmSystem" IsChecked="{Binding Path=ShowEventGsmSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Connector"/>
+                    <CheckBox x:Name="CheckBox_ShowEventGsmSent" IsChecked="{Binding Path=ShowEventGsmSent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="an Modem"/>
+                    <CheckBox x:Name="CheckBox_ShowEventGsmRec" IsChecked="{Binding Path=ShowEventGsmRec, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="von Modem"/>
+                    <Separator />
+                    <Label>SMS</Label>
+                    <CheckBox x:Name="CheckBox_ShowEventSmsRec" IsChecked="{Binding Path=ShowEventSmsRec, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="SMS empfangen"/>
+                    <CheckBox x:Name="CheckBox_ShowEventSmsSent" IsChecked="{Binding Path=ShowEventSmsSent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="SMS gesendet"/>
+                    <CheckBox x:Name="CheckBox_ShowEventSmsStatus" IsChecked="{Binding Path=ShowEventSmsStatus, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="SMS Statusreport"/>
+                    <Separator />
+                </StackPanel>
+
+                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Visible">
+                    <ListBox x:Name="counterLabel" ItemsSource="{Binding TrafficList}" Margin="10" >
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Message}" Foreground="{Binding MessageColor}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </ScrollViewer>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Empfangen" GotFocus="Button_RefreshTableRec_Click">
+            <WrapPanel Orientation="Vertical">
+                <Button x:Name="Button_RefreshTableRec" Content="Refresh" Click="Button_RefreshTableRec_Click"/>
+                <DataGrid x:Name="DataGrid_Rec" ItemsSource="{Binding Path=TableRec}" CanUserAddRows="False"/>
+
+            </WrapPanel>
+        </TabItem>
+        <TabItem Header="Gesendet" GotFocus="Button_RefreshTableSent_Click">
+            <WrapPanel Orientation="Vertical">
+                <Button x:Name="Button_RefreshTableSent" Content="Refresh" Click="Button_RefreshTableSent_Click"/>
+                <DataGrid x:Name="DataGrid_Sent" ItemsSource="{Binding Path=TableSent}" CanUserAddRows="False"/>
+
+            </WrapPanel>
+        </TabItem>
+        <TabItem Header="Schicht">
+            <Grid Background="#FFE5E5E5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Label>Datum</Label>
+                <Label>Datum</Label>
+                <Label>Datum</Label>
+                <Label>Datum</Label>
+                <Label>Datum</Label>
+                <Label>Datum</Label>
+
+                <Rectangle Grid.Row="2" Grid.Column="2" Width="20" Height="20" Margin="1" Fill="Red" />
+                <Rectangle Grid.Row="2" Grid.Column="3" Width="20" Height="20" Margin="1" Fill="Red" />
+
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>

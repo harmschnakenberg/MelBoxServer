@@ -12,25 +12,38 @@ namespace MelBoxServer
         internal static string PipeNameOut = "ToManager";
 
         internal static MelBoxSql.MelBoxSql Sql = new MelBoxSql.MelBoxSql();
+        internal static MelBoxGsm.Gsm Gsm = new MelBoxGsm.Gsm();
 
         static void Main()
         {
             PipeIn.RaisePipeRecEvent += HandlePipeRecEvent;
             PipeIn.ListenToPipe(PipeNameIn);
 
-            MelBoxGsm.Gsm gsm = new MelBoxGsm.Gsm();
+            //#region TEST
+            //var tuples =  Sql.SafeAndRelayNewMessage("Dies ist eine simulierte Empfangene SMS.", 4916095285304);
+
+            //foreach (var tuple in tuples)
+            //{
+            //    Console.WriteLine("simuliert Weiterleiten an:\r\n{0}\r\n[{1}] {2}", tuple.Item1, tuple.Item2, tuple.Item3);
+            //}
+
+            //Console.WriteLine("Ende Test");
+            //Console.ReadKey();
+            //#endregion
+
             //gsm.RaiseGsmFatalErrorEvent += HandleGsmFatalErrorEvent;
-            gsm.RaiseGsmSystemEvent += HandleGsmSystemEvent;
+            Gsm.RaiseGsmSystemEvent += HandleGsmSystemEvent;
             //gsm.RaiseGsmSentEvent += HandleGsmSentEvent;
             //gsm.RaiseGsmRecEvent += HandleGsmRecEvent;
-            gsm.RaiseSmsStatusreportEvent += HandleSmsStatusReportEvent;
-            gsm.RaiseSmsRecievedEvent += HandleSmsRecievedEvent;
-            gsm.RaiseSmsSentEvent += HandleSmsSentEvent;
+            Gsm.RaiseSmsStatusreportEvent += HandleSmsStatusReportEvent;
+            Gsm.RaiseSmsRecievedEvent += HandleSmsRecievedEvent;
+            Gsm.RaiseSmsSentEvent += HandleSmsSentEvent;
 
-            gsm.TryConnectPort(); //TEST
+            Gsm.TryConnectPort(); //TEST
 
             string cmdLine = "AT";
-            gsm.AddAtCommand(cmdLine);
+            Gsm.AddAtCommand(cmdLine);
+
 
 
             Console.WriteLine("\r\nAT-Befehl eingeben:");
@@ -40,18 +53,18 @@ namespace MelBoxServer
                 {
                     string[] s = cmdLine.Split('/');
 
-                    gsm.SmsSend(MelBoxGsm.Gsm.StrToPhone(s[1]), s[2]);
+                    Gsm.SmsSend(MelBoxGsm.Gsm.StrToPhone(s[1]), s[2]);
                 }
                 else
                 {                   
-                    gsm.AddAtCommand(cmdLine);                   
+                    Gsm.AddAtCommand(cmdLine);                   
                 }
                 cmdLine = Console.ReadLine();
             }
 
             Console.WriteLine("Beenden mit beliebieger Taste...");
             Console.ReadKey();
-            gsm.ClosePort();
+            Gsm.ClosePort();
         }
     }
 }

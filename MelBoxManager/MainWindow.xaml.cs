@@ -20,47 +20,21 @@ namespace MelBoxManager
         internal static string PipeNameIn = "ToManager";
         internal static string PipeNameOut = "ToServer";
 
+        internal static MelBoxSql.MelBoxSql Sql = new MelBoxSql.MelBoxSql();
+
         public MainWindow()
         {
             InitializeComponent();
-            counterLabel.ItemsSource = var.TrafficList;
+            DataContext = var;
 
+            Label_PipeIn.Content = PipeNameIn;
+            Label_PipeOut.Content = PipeNameOut;
+            
             PipeIn.RaisePipeRecEvent += HandlePipeRecEvent;
             PipeIn.ListenToPipe(PipeNameIn);
         }
 
-        private void HandlePipeRecEvent(object sender, string e)
-        {
-
-            if (e.StartsWith("{"))
-            {
-                GsmEventArgs telegram = Gsm.JSONDeserializeTelegram(e);
-                char[] replace = { '\r', '\n' };
-
-                LogItem log = new LogItem
-                {
-                    Message = telegram.Message.Replace("\r\n\r\n", "\r\n").Replace("\r\r\n", "\r\n").Trim(replace), //Zeilenumbrüche minimieren
-                    MessageColor = Var.GetColorFromTelegram(telegram)
-                };
-
-                Dispatcher.Invoke(new Action(() => //Dispatcher ist notwendig, um im UI-Thread ändern zu können.
-                     var.AddToTrafficList(log)
-                ));
-            }
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            LogItem log = new LogItem
-            {
-                Message = DateTime.Now.ToString(),
-                MessageColor = Brushes.Chocolate
-            };
-
-            var.AddToTrafficList(log);
-        }
-
-
+        
     }
 
 

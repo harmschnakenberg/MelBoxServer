@@ -104,7 +104,7 @@ namespace MelBoxSql
         /// <param name="phone"></param>
         /// <param name="email"></param>
         /// <returns>ID der Empfangenen Nachricht; Wenn nicht erfolgreich 0.</returns>
-        public int InsertRecMessage(string message, ulong phone = 0, string email = "")
+        internal int InsertRecMessage(string message, ulong phone = 0, string email = "")
         {
             int msgId;
             try
@@ -157,7 +157,7 @@ namespace MelBoxSql
         /// <param name="contactId">Id des Bereitschaftsnehmers</param>
         /// <param name="startTime">Beginn der Bereitschaft</param>
         /// <param name="endTime">Ende der Bereitschaft</param>
-        public void InsertShift(int contactId, DateTime startTime, DateTime endTime)
+        public void InsertShift(int contactId, DateTime startTime, int hoursDuration)
         {
             try
             {
@@ -168,11 +168,11 @@ namespace MelBoxSql
 
                     var command = connection.CreateCommand();
                     command.CommandText = "INSERT INTO \"Shifts\" (\"EntryTime\", \"ContactId\", \"StartTime\", \"EndTime\") VALUES " +
-                                          "(CURRENT_TIMESTAMP, @contactId, @startTime, @endTime )";
+                                          "(CURRENT_TIMESTAMP, @contactId, @startTime, @HoursDuration )";
 
                     command.Parameters.AddWithValue("@contactId", contactId);
                     command.Parameters.AddWithValue("@startTime", SqlTime(startTime));
-                    command.Parameters.AddWithValue("@endTime", SqlTime(endTime));
+                    command.Parameters.AddWithValue("@HoursDuration", hoursDuration);
 
                     command.ExecuteNonQuery();
                 }

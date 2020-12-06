@@ -55,6 +55,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Tab_LifeTicker.cs" />
+    <Compile Include="Tab_Messages.cs" />
+    <Compile Include="Tab_Shift.cs" />
     <Compile Include="Vars.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -103,6 +106,10 @@
     <ProjectReference Include="..\MelBoxPipe\MelBoxPipe.csproj">
       <Project>{2ef40402-5207-485d-82ca-0fb76feedc1a}</Project>
       <Name>MelBoxPipe</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MelBoxSql\MelBoxSql.csproj">
+      <Project>{15ada787-941b-41aa-83b5-c2ac51831ae3}</Project>
+      <Name>MelBoxSql</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

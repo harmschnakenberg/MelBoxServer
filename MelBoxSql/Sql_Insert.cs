@@ -104,7 +104,7 @@ namespace MelBoxSql
         /// <param name="phone"></param>
         /// <param name="email"></param>
         /// <returns>ID der Empfangenen Nachricht; Wenn nicht erfolgreich 0.</returns>
-        internal int InsertRecMessage(string message, ulong phone = 0, string email = "")
+        public int InsertRecMessage(string message, ulong phone = 0, string email = "")
         {
             int msgId;
             try
@@ -155,25 +155,38 @@ namespace MelBoxSql
         /// Erstellt einen neuen Bereitschaftsdienst
         /// </summary>
         /// <param name="contactId">Id des Bereitschaftsnehmers</param>
-        /// <param name="startTime">Beginn der Bereitschaft</param>
-        /// <param name="endTime">Ende der Bereitschaft</param>
-        public void InsertShift(int contactId, DateTime startTime, int hoursDuration)
+        /// <param name="startDate">Datum Beginn der Bereitschaft. Die Uhrzeit für Start und Ende werden ermittelt. </param>
+        public void InsertShift(int contactId, DateTime startDate)
         {
             try
             {
+                #region Startzeit
+                startDate = startDate.ToUniversalTime().Date;
+                int startHour = 17;
+                int endHour = 7;
+
+                if (startDate.DayOfWeek == DayOfWeek.Saturday || startDate.DayOfWeek == DayOfWeek.Sunday || IsHolyday(startDate))
+                {
+                    startHour = 7; //Sa. So., Feiertags Beginn um 7 Uhr
+                }
+                else if (startDate.DayOfWeek == DayOfWeek.Friday)
+                {
+                    startHour = 15; //Freitags Beginn um 15 Uhr
+                }
+                #endregion
 
                 using (var connection = new SqliteConnection(DataSource))
                 {
                     connection.Open();
 
                     var command = connection.CreateCommand();
-                    command.CommandText = "INSERT INTO \"Shifts\" (\"EntryTime\", \"ContactId\", \"StartTime\", \"EndTime\") VALUES " +
-                                          "(CURRENT_TIMESTAMP, @contactId, @startTime, @HoursDuration )";
+                    command.CommandText = "INSERT INTO \"Shifts\" (\"EntryTime\", \"ContactId\", \"StartDate\", \"StartHour\", \"EndHour\") VALUES " +
+                                          "(CURRENT_TIMESTAMP, @contactId, @startDate, @startHour, @endHour )";
 
                     command.Parameters.AddWithValue("@contactId", contactId);
-                    command.Parameters.AddWithValue("@startTime", SqlTime(startTime));
-                    command.Parameters.AddWithValue("@HoursDuration", hoursDuration);
-
+                    command.Parameters.AddWithValue("@startDate", SqlTime(startDate));
+                    command.Parameters.AddWithValue("@startHour", startHour);
+                    command.Parameters.AddWithValue("@endHour", endHour);
                     command.ExecuteNonQuery();
                 }
             }
@@ -182,6 +195,39 @@ namespace MelBoxSql
                 throw new Exception("Sql-Fehler InsertShift()" + ex.GetType() + "\r\n" + ex.Message);
             }
         }
+
+        /// <summary>
+        /// Erstellt einen neuen Bereitschaftsdienst
+        /// </summary>
+        /// <param name="contactId">Id des Bereitschaftsnehmers</param>
+        /// <param name="startDate">Datum Beginn der Bereitschaft.</param>
+        /// <param name="startHour">Stunde Beginn Bereitschaft</param>
+        /// <param name="endHour">Stunde Ende Bereitschaft am Folgetag von startDate.</param>
+        public void InsertShift(int contactId, DateTime startDate, int startHour = 17, int endHour = 7)
+        {
+            try
+            {
+                using (var connection = new SqliteConnection(DataSource))
+                {
+                    connection.Open();
+
+                    var command = connection.CreateCommand();
+                    command.CommandText = "INSERT INTO \"Shifts\" (\"EntryTime\", \"ContactId\", \"StartTime\", \"EndTime\") VALUES " +
+                                          "(CURRENT_TIMESTAMP, @contactId, @startDate, @startHour @endHour )";
+
+                    command.Parameters.AddWithValue("@contactId", contactId);
+                    command.Parameters.AddWithValue("@startTime", SqlTime(startDate.Date));
+                    command.Parameters.AddWithValue("@startHour", startHour);
+                    command.Parameters.AddWithValue("@endHour", endHour);
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Sql-Fehler InsertShift()" + ex.GetType() + "\r\n" + ex.Message);
+            }
+        }
+
 
         /// <summary>
         /// Fügt eine Nachricht der "Blacklist" hinzu, sodass diese bei Empfang nicht weitergeleitet wird.
@@ -225,7 +271,7 @@ namespace MelBoxSql
         /// <param name="recMsgId">Id der Nachricht, die weitergeleitet wurde</param>
         /// <param name="sentToId">Id des Kontakts, an den die Nachricht gesendet wurde</param>
         /// <param name="way">Sendeweg (SMS, Email)</param>
-        public void InsertLogSent(int recMsgId, int sentToId, SendToWay way)
+        public int InsertLogSent(int recMsgId, int sentToId, SendToWay way)
         {
             try
             {
@@ -235,34 +281,40 @@ namespace MelBoxSql
 
                     var command = connection.CreateCommand();
                     command.CommandText = "INSERT INTO \"LogSent\" (\"LogRecievedId\", \"SentTime\", \"SentToId\", \"SentVia\") " +
-                                          "VALUES (@msgId, CURRENT_TIMESTAMP, @sentToId, @sendWay);";
+                                          "VALUES (@msgId, CURRENT_TIMESTAMP, @sentToId, @sendWay);" +
+                                          "SELECT Id FROM \"LogSent\" ORDER BY \"SentTime\" DESC LIMIT 1";
 
                     command.Parameters.AddWithValue("@msgId", recMsgId);
                     command.Parameters.AddWithValue("@sentToId", sentToId);
                     command.Parameters.AddWithValue("@sendWay", (int)way);
 
-                    command.ExecuteNonQuery();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            //Lese Eintrag
+                            if (int.TryParse(reader.GetString(0), out int sendId))
+                            {                                
+                                return sendId;
+                            }
+                        }
+                    }
+
                 }
             }
             catch (Exception)
             {
                 throw new Exception("Sql-Fehler InsertLogSent()");
             }
+            return 0;
         }
 
 
-        public void InsertLogSent(ulong sentToPhone, string content)
+        public int InsertLogSent(ulong sentToPhone, int recMsgId)
         {
-            //ContendId herausfinden
-            int contendId = GetMessageId(content);
-
             //EmpfängerId herausfinden
             int sendToId = GetContactId("", sentToPhone);
-
-            if (contendId > 0 && sendToId > 0)
-            {
-                InsertLogSent(contendId, sendToId, SendToWay.Sms);
-            }
+            return InsertLogSent(recMsgId, sendToId, SendToWay.Sms);
         }
 
     }

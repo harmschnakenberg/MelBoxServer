@@ -94,8 +94,8 @@ namespace MelBoxServer
 			Console.ForegroundColor = ConsoleColor.Gray;
 
 			PipeOut.SendToPipe(PipeNameOut, MelBoxGsm.Gsm.JSONSerialize(e));
-
-			Sql.UpdateLogSent(e.Phone, e.Content, e.SendStatus);
+			
+			Sql.UpdateLogSent(e.LogSentId, e.SendStatus);
 		}
 
 		static void HandleSmsRecievedEvent(object sender, Sms e)
@@ -107,10 +107,16 @@ namespace MelBoxServer
 
 			PipeOut.SendToPipe(PipeNameOut, MelBoxGsm.Gsm.JSONSerialize(e));
 
-			//Neu empfangene Nachricht in DB eintragen, wenn nicht gesperrt an aktuelle Bereitschaft weiterleiten.
-			foreach (Tuple<ulong, string, int> tuple in Sql.SafeAndRelayNewMessage(e.Content, e.Phone))
+			//Neue Nachricht in DB speichern
+			int recMsgId = Sql.InsertRecMessage(e.Content, e.Phone);
+
+			//Für jeden Empfänger (Bereitschaft) eine SMS vorbereiten
+			foreach (ulong phone in Sql.GetCurrentShiftPhoneNumbers())
 			{
-				Gsm.SmsSend(tuple.Item1, tuple.Item2, tuple.Item3);
+				//Zu sendende Nachricht in DB protokollieren
+				int sentId = Sql.InsertLogSent(phone, recMsgId);
+				//Nachricht weiterleiten
+				Gsm.SmsSend(phone, e.Content, sentId);
 			}
 		}
 
@@ -122,8 +128,8 @@ namespace MelBoxServer
 			Console.ForegroundColor = ConsoleColor.Gray;
 
 			PipeOut.SendToPipe(PipeNameOut, MelBoxGsm.Gsm.JSONSerialize(e));
-			//Neu gesendete Nachricht in DB eintragen:
-			Sql.InsertLogSent(e.Phone, e.Content);
+			//Status 'Neue Nachricht Sendeversuch' in DB eintragen:
+			Sql.UpdateLogSent(e.LogSentId, -1);
 		}
 	}
 }

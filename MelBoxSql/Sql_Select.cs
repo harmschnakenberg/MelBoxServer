@@ -176,8 +176,7 @@ namespace MelBoxSql
                             }
 
                             //Erzeuge eine neue Schicht für heute mit Standardwerten (Bereitschaftshandy)
-                            DateTime monday = DateTime.Now.Date.AddDays(-(int)DateTime.Now.DayOfWeek);
-                            InsertShift(contactIdBereitschafshandy, monday, monday.AddDays(7));
+                            InsertShift(contactIdBereitschafshandy, DateTime.Now);
                         }
                       
                     }
@@ -267,9 +266,13 @@ namespace MelBoxSql
             return IsMessageBlocked(msgId);
         }
 
+        #region Views
         public DataTable GetRecMsgView()
         {
-            DataTable recTable = new DataTable();
+            DataTable recTable = new DataTable
+            {
+                TableName = "Empfangen"
+            };
 
             try
             {
@@ -280,7 +283,7 @@ namespace MelBoxSql
                     
                     var command1 = connection.CreateCommand();
                     
-                    command1.CommandText = "SELECT * FROM \"RecievedMessages\" ORDER BY Empfangen DESC LIMIT 1000";
+                    command1.CommandText = "SELECT * FROM \"RecievedMessagesView\" ORDER BY Empfangen DESC LIMIT 1000";
 
                     using (var reader = command1.ExecuteReader())
                     {
@@ -298,7 +301,10 @@ namespace MelBoxSql
 
         public DataTable GetSentMsgView()
         {
-            DataTable sentTable = new DataTable();
+            DataTable sentTable = new DataTable
+            {
+                TableName = "Gesendet"
+            };
 
             try
             {
@@ -309,7 +315,7 @@ namespace MelBoxSql
 
                     var command1 = connection.CreateCommand();
 
-                    command1.CommandText = "SELECT * FROM \"SentMessages\" ORDER BY Gesendet DESC LIMIT 1000";
+                    command1.CommandText = "SELECT * FROM \"SentMessagesView\" ORDER BY Gesendet DESC LIMIT 1000";
 
                     using (var reader = command1.ExecuteReader())
                     {
@@ -324,5 +330,71 @@ namespace MelBoxSql
 
             return sentTable;
         }
+
+        public DataTable GetOverdueMsgView()
+        {
+            DataTable overdueTable = new DataTable
+            {
+                TableName = "Fehlende Meldungen"
+            };
+
+            try
+            {
+                using (var connection = new SqliteConnection(DataSource))
+                {
+                    connection.Open();
+
+
+                    var command1 = connection.CreateCommand();
+
+                    command1.CommandText = "SELECT * FROM \"OverdueView\" ORDER BY LastRecieved DESC LIMIT 1000";
+
+                    using (var reader = command1.ExecuteReader())
+                    {
+                        overdueTable.Load(reader);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Sql-Fehler GetOverdueMsgView() " + ex.GetType() + "\r\n" + ex.Message);
+            }
+
+            return overdueTable;
+        }
+
+        public DataTable GetBlockedMsgView()
+        {
+            DataTable overdueTable = new DataTable
+            {
+                TableName = "Gesperrte Meldungen"
+            };
+
+            try
+            {
+                using (var connection = new SqliteConnection(DataSource))
+                {
+                    connection.Open();
+
+
+                    var command1 = connection.CreateCommand();
+
+                    command1.CommandText = "SELECT * FROM \"BlockedMessagesView\"";
+
+                    using (var reader = command1.ExecuteReader())
+                    {
+                        overdueTable.Load(reader);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Sql-Fehler GetBlockedMsgView() " + ex.GetType() + "\r\n" + ex.Message);
+            }
+
+            return overdueTable;
+        }
+
+        #endregion
     }
 }

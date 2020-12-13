@@ -126,11 +126,10 @@ namespace MelBoxSql
                     {
                         command.CommandText = "UPDATE \"Contact\" SET \"KeyWord\" = @value WHERE \"Id\" = @contactId;"; ;
                         command.Parameters.AddWithValue("@contactId", contactId);
-                        command.Parameters.AddWithValue("@value", keyWord == null ? "NULL" : keyWord);
+                        command.Parameters.AddWithValue("@value", keyWord ?? "NULL" ); //Wenn keyWord == null Dann string "NULL"
+
                         command.ExecuteNonQuery();
                     }
-
-
                 }
             }
             catch (Exception ex)
@@ -147,29 +146,25 @@ namespace MelBoxSql
 
         // UpdateLogSent
         /// <summary>
-        /// BAUSTELLE! Ändert Sendestatus im Sendeprotokoll
+        /// Ändert Sendestatus im Sendeprotokoll
         /// </summary>
         /// <param name="contendId"></param>
         /// <param name="sendToId"></param>
         /// <param name="confirmStatus"></param>
-        public void UpdateLogSent(int contendId, int sendToId, int sendstatus)
+        public void UpdateLogSent(int logSentId, int sendstatus)
         {
-
             try
             {
-
                 using (var connection = new SqliteConnection(DataSource))
                 {
                     connection.Open();
 
                     var command = connection.CreateCommand();
-                    command.CommandText = "UPDATE \"LogSent\" SET \"ConfirmStatus\" = @confirmStatus FROM " +
-                                          "(SELECT * FROM \"LogSent\" " +
-                                          "WHERE \"LogRecievedId\" = @contendId AND \"SentToId\" = @sendToId " +
-                                          "ORDER BY \"SentTime\" DESC LIMIT 1);";
+                    command.CommandText = "UPDATE \"LogSent\" " +
+                                          "SET \"ConfirmStatus\" = @confirmStatus FROM " +
+                                          "WHERE \"Id\" = @logSentId ";
 
-                    command.Parameters.AddWithValue("@contendId", contendId);
-                    command.Parameters.AddWithValue("@sendToId", sendToId);
+                    command.Parameters.AddWithValue("@logSentId", logSentId);                    
                     command.Parameters.AddWithValue("@confirmStatus", sendstatus);
 
                     command.ExecuteNonQuery();
@@ -181,23 +176,6 @@ namespace MelBoxSql
                 throw new Exception("Sql-Fehler UpdateLogSent()\r\n" + ex.GetType() + "\r\n" + ex.Message);
             }
         }
-
-
-        public void UpdateLogSent(ulong sentToPhone, string content, int sendStatus)
-        {
-
-            //ContendId herausfinden
-            int contendId = GetMessageId(content);
-
-            //EmpfängerId herausfinden
-            int sendToId = GetContactId("", sentToPhone);
-
-            if (contendId > 0 && sendToId > 0)
-            {
-                UpdateLogSent(contendId, sendToId, sendStatus);
-            }
-        }
-
 
     }
 }

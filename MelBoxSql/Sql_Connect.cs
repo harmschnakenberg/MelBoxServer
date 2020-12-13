@@ -60,11 +60,11 @@ namespace MelBoxSql
 
                         "CREATE TABLE \"LogRecieved\"( \"Id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"RecieveTime\" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, \"FromContactId\" INTEGER NOT NULL, \"ContentId\" INTEGER NOT NULL);",
 
-                        "CREATE TABLE \"LogSent\" (\"Id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"LogRecievedId\" INTEGER NOT NULL, \"SentTime\" TEXT NOT NULL, \"SentToId\" INTEGER NOT NULL, \"SentVia\" INTEGER NOT NULL, \"ConfirmStatus\" INTEGER NOT NULL DEFAULT -1);" +
+                        "CREATE TABLE \"LogSent\" (\"Id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"LogRecievedId\" INTEGER NOT NULL, \"SentTime\" TEXT NOT NULL, \"SentToId\" INTEGER NOT NULL, \"SentVia\" INTEGER NOT NULL, \"ConfirmStatus\" INTEGER NOT NULL DEFAULT -2);" +
                         
                         //Bereitschaft
                         "CREATE TABLE \"Shifts\"( \"Id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"EntryTime\" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
-                        "\"ContactId\" INTEGER NOT NULL, \"StartTime\" TEXT NOT NULL, \"HoursDuration\" INTEGER NOT NULL );",
+                        "\"ContactId\" INTEGER NOT NULL, \"StartDate\" TEXT NOT NULL, \"StartHour\" INTEGER NOT NULL, \"EndHour\" INTEGER NOT NULL );",
 
                         "CREATE TABLE \"BlockedMessages\"( \"Id\" INTEGER NOT NULL UNIQUE, \"EntryTime\" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, \"StartHour\" INTEGER NOT NULL, " +
                         "\"EndHour\" INTEGER NOT NULL, \"Days\" INTEGER NOT NULL);",
@@ -77,11 +77,19 @@ namespace MelBoxSql
                         "INSERT INTO \"SendWay\" (\"Way\", \"Code\") VALUES ('Dummy', " + (int)SendToWay.None + ");",
 
                         //Views
-                        "CREATE VIEW \"RecievedMessages\" AS SELECT r.Id As EmpfangNr, RecieveTime AS Empfangen, c.Name AS von, Content AS Inhalt " +
+                        "CREATE VIEW \"RecievedMessagesView\" AS SELECT r.Id As Nr, RecieveTime AS Empfangen, c.Name AS von, Content AS Inhalt " +
                         "FROM LogRecieved AS r JOIN Contact AS c ON FromContactId = c.Id JOIN MessageContent AS m ON ContentId = m.Id",
                         
-                        "CREATE VIEW \"SentMessages\" AS SELECT LogRecievedId As EmpfangNr, Content AS Inhalt, SentTime AS Gesendet, Name AS An, Way AS Medium, ConfirmStatus As Sendestatus " +
-                        "FROM LogSent AS ls JOIN Contact AS c ON SentToId =  c.Id JOIN SendWay AS sw ON c.SendWay = sw.Code JOIN LogRecieved AS lr ON lr.Id = ls.LogRecievedId JOIN MessageContent AS mc ON mc.id = lr.FromContactId"
+                        "CREATE VIEW \"SentMessagesView\" AS SELECT LogRecievedId As Nr, Content AS Inhalt, SentTime AS Gesendet, Name AS An, Way AS Medium, ConfirmStatus As Sendestatus " +
+                        "FROM LogSent AS ls JOIN Contact AS c ON SentToId =  c.Id JOIN SendWay AS sw ON c.SendWay = sw.Code JOIN LogRecieved AS lr ON lr.Id = ls.LogRecievedId JOIN MessageContent AS mc ON mc.id = lr.FromContactId",
+
+                        "CREATE VIEW \"OverdueView\" AS SELECT FromContactId AS ContactId, Name, MaxInactiveHours, RecieveTime AS LastRecieved, DATETIME(RecieveTime, '+' || MaxInactiveHours ||' hours') AS Timeout FROM LogRecieved " +
+                        "JOIN Contact ON Contact.Id = LogRecieved.FromContactId WHERE MaxInactiveHours > 0 AND DATETIME(RecieveTime, '+' || MaxInactiveHours ||' hours') < Datetime('now')",
+
+                        "CREATE VIEW \"BlockedMessagesView\" AS SELECT BlockedMessages.Id, Content, StartHour || ' Uhr' As Beginn, EndHour || ' Uhr' As Ende, " +
+                        "(SELECT Days & 1 > 0) AS So, (SELECT Days & 2 > 0) AS Mo, (SELECT Days & 3 > 0) AS Di, (SELECT Days & 4 > 0) AS Mi, (SELECT Days & 5 > 0) AS Do, (SELECT Days & 6 > 0) AS Fr, (SELECT Days & 7 > 0) AS Sa " +
+                        " FROM BlockedMessages JOIN MessageContent ON MessageContent.Id = BlockedMessages.Id"
+
                 };
 
                 foreach (string query in TableCreateQueries)
@@ -107,7 +115,12 @@ namespace MelBoxSql
 
                 InsertLogSent(1, 1, SendToWay.None);
 
-                InsertShift(2, DateTime.Now.Date.AddHours(-7), 10);
+                InsertShift(2, DateTime.Now);
+                InsertShift(2, DateTime.Now.AddDays(1));
+                InsertShift(2, DateTime.Now.AddDays(2));
+                InsertShift(2, DateTime.Now.AddDays(3));
+                InsertShift(2, DateTime.Now.AddDays(4));
+                InsertShift(2, DateTime.Now.AddDays(5));
 
                 InsertBlockedMessage(1);
             }

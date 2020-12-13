@@ -178,15 +178,15 @@ namespace MelBoxGsm
 
                     if (status != "REC UNREAD" && status != "REC READ") continue; //nur empfangene Nachrichten
 
-                    Sms confiredSms = SmsQueue.FindAll(x => x.TrackingId == trackingId).FirstOrDefault();
-                    if (confiredSms != null)
+                    Sms confirmedSms = SmsQueue.FindAll(x => x.TrackingId == trackingId).FirstOrDefault();
+                    if (confirmedSms != null)
                     {
-                        confiredSms.SendStatus = trackingStatus;
-                        OnRaiseSmsStatusreportEvent(confiredSms);
+                        confirmedSms.SendStatus = trackingStatus;
+                        OnRaiseSmsStatusreportEvent(confirmedSms);
 
-                        if (confiredSms.SendStatus < 32) //SMS erfolgreich versendet
+                        if (confirmedSms.SendStatus < 32) //SMS erfolgreich versendet
                         {
-                            SmsQueue.Remove(confiredSms);
+                            SmsQueue.Remove(confirmedSms);
                         }
                     }
                     SmsToDelete.Add(index); //Diesen Statusreport löschen 

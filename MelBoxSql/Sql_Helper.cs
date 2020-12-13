@@ -210,25 +210,6 @@ namespace MelBoxSql
         #endregion
 
 
-        public List<Tuple<ulong, string, int>> SafeAndRelayNewMessage(string relayMessage, ulong recFromPhone)
-        {
-            Console.WriteLine("SQL: Nachricht empfangen.");
-            List<Tuple<ulong, string, int>> list = new List<Tuple<ulong, string, int>>();
-
-            //Empfangene Nachricht in DB protokollieren (Inhalt, Sender)
-            int recMsgId = InsertRecMessage(relayMessage, recFromPhone);
-
-            //Ist die Nachricht gesperrt?
-            if (IsMessageBlocked(relayMessage)) return list;
-
-            //Für jeden Empfänger (Bereitschaft) eine SMS vorbereiten
-            foreach (ulong phone in GetCurrentShiftPhoneNumbers())
-            {
-                list.Add(new Tuple<ulong, string, int>(phone, relayMessage, recMsgId));
-            }
-
-            return list;
-        }
 
     }
 }

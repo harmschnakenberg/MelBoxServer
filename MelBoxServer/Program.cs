@@ -11,7 +11,7 @@ namespace MelBoxServer
         internal static string PipeNameIn = "ToServer";
         internal static string PipeNameOut = "ToManager";
 
-        internal static MelBoxSql.MelBoxSql Sql = new MelBoxSql.MelBoxSql();
+        public static MelBoxSql.MelBoxSql Sql = new MelBoxSql.MelBoxSql();
         internal static MelBoxGsm.Gsm Gsm = new MelBoxGsm.Gsm();
 
         static void Main()
@@ -19,7 +19,12 @@ namespace MelBoxServer
             PipeIn.RaisePipeRecEvent += HandlePipeRecEvent;
             PipeIn.ListenToPipe(PipeNameIn);
 
+            MelBoxWeb.MelBoxWebServer.StartWebServer();
+
             //#region TEST
+
+            Sql.UpdateShift(1, DateTime.Now, 7, 7, 7);
+            Sql.UpdateContact(3, MelBoxSql.MelBoxSql.SendToWay.None);
             //var tuples =  Sql.SafeAndRelayNewMessage("Dies ist eine simulierte Empfangene SMS.", 4916095285304);
 
             //foreach (var tuple in tuples)
@@ -44,8 +49,6 @@ namespace MelBoxServer
             string cmdLine = "AT";
             Gsm.AddAtCommand(cmdLine);
 
-
-
             Console.WriteLine("\r\nAT-Befehl eingeben:");
             while (cmdLine.Length > 0)
             {
@@ -54,16 +57,34 @@ namespace MelBoxServer
                     string[] s = cmdLine.Split('/');
 
                     Gsm.SmsSend(MelBoxGsm.Gsm.StrToPhone(s[1]), s[2]);
+                } else if (cmdLine.StartsWith("sim"))
+                {
+                    string[] s = cmdLine.Split('/');
+                    if (s[1] == "rec")
+                    {
+                        MelBoxGsm.Sms sms = new MelBoxGsm.Sms
+                        {
+                            Content = "Dies ist eine simuliert empfangene SMS.",
+                            Index = 254,
+                            Phone = 4942073559,
+                            Status = "REC UNREAD"
+                        };
+
+                        HandleSmsRecievedEvent(null, sms);
+                    }
                 }
                 else
-                {                   
-                    Gsm.AddAtCommand(cmdLine);                   
+                {
+                    Gsm.AddAtCommand(cmdLine);
                 }
                 cmdLine = Console.ReadLine();
             }
 
+
             Console.WriteLine("Beenden mit beliebieger Taste...");
             Console.ReadKey();
+
+            MelBoxWeb.MelBoxWebServer.StopWebServer();
             Gsm.ClosePort();
         }
     }

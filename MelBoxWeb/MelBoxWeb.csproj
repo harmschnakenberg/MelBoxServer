@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{99C35357-7A3F-4C2F-8482-6215284EB921}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>MelBoxWeb</RootNamespace>
     <AssemblyName>MelBoxWeb</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Grapevine, Version=4.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Grapevine.4.1.2\lib\net40\Grapevine.dll</HintPath>
@@ -46,7 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Web_Service.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -55,7 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MelBoxSql\MelBoxSql.csproj">
-      <Project>{15ADA787-941B-41AA-83B5-C2AC51831AE3}</Project>
+      <Project>{15ada787-941b-41aa-83b5-c2ac51831ae3}</Project>
       <Name>MelBoxSql</Name>
     </ProjectReference>
   </ItemGroup>

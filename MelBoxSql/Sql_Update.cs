@@ -161,7 +161,7 @@ namespace MelBoxSql
 
                     var command = connection.CreateCommand();
                     command.CommandText = "UPDATE \"LogSent\" " +
-                                          "SET \"ConfirmStatus\" = @confirmStatus FROM " +
+                                          "SET \"ConfirmStatus\" = @confirmStatus " +
                                           "WHERE \"Id\" = @logSentId ";
 
                     command.Parameters.AddWithValue("@logSentId", logSentId);                    
@@ -176,6 +176,40 @@ namespace MelBoxSql
                 throw new Exception("Sql-Fehler UpdateLogSent()\r\n" + ex.GetType() + "\r\n" + ex.Message);
             }
         }
+
+        public void UpdateShift(int shiftId, DateTime startDate, int StartHour, int EndHour, int contactId)
+        {
+            try
+            {
+                using (var connection = new SqliteConnection(DataSource))
+                {
+                    connection.Open();
+
+                    var command = connection.CreateCommand();
+                    command.CommandText = "UPDATE \"Shifts\" " +
+                                          "SET  \"EntryTime\" = CURRENT_TIMESTAMP, "+
+                                          "\"StartDate\" = @startDate, " +
+                                          "\"StartHour\" = @startHour, " +
+                                          "\"EndHour\" = @endHour, " +
+                                          "\"ContactId\" = @contactId " +
+                                          "WHERE \"Id\" = @shiftId; ";
+
+                    command.Parameters.AddWithValue("@startDate", SqlTime(startDate) );
+                    command.Parameters.AddWithValue("@startHour", StartHour);
+                    command.Parameters.AddWithValue("@endHour", EndHour);
+                    command.Parameters.AddWithValue("@contactId", contactId);
+                    command.Parameters.AddWithValue("@shiftId", shiftId);
+
+                    command.ExecuteNonQuery();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Sql-Fehler UpdateShift()\r\n" + ex.GetType() + "\r\n" + ex.Message);
+            }            
+        }
+
 
     }
 }

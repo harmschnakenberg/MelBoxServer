@@ -163,7 +163,7 @@ namespace MelBoxSql
                     command.CommandText = @"SELECT Id " +
                                             "FROM Shifts " +
                                             "WHERE  " +
-                                            "CURRENT_TIMESTAMP BETWEEN StartTime AND EndTime";
+                                            "CURRENT_TIMESTAMP BETWEEN DateTime(StartDate, '+'||StartHour||' hours') AND DateTime(StartDate, '+1 day', '+'||EndHour||' hours')";
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -186,7 +186,7 @@ namespace MelBoxSql
                     command.CommandText =   "SELECT \"Phone\" FROM Contact " +
                                             "WHERE \"Phone\" > 0 AND " +
                                             "\"Id\" IN " +
-                                            "( SELECT ContactId FROM Shifts WHERE CURRENT_TIMESTAMP BETWEEN StartTime AND EndTime )";
+                                            "( SELECT ContactId FROM Shifts WHERE CURRENT_TIMESTAMP BETWEEN DateTime(StartDate, '+'||StartHour||' hours') AND DateTime(StartDate, '+1 day', '+'||EndHour||' hours') )";
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -264,6 +264,35 @@ namespace MelBoxSql
         {
             int msgId = GetMessageId(message);
             return IsMessageBlocked(msgId);
+        }
+
+        public int GetContactIdFromLogin(string name, string password)
+        {
+
+            using (var connection = new SqliteConnection(DataSource))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+                command.CommandText = "SELECT \"Id\" FROM \"Contact\" WHERE Name = @name AND ( Password = @password OR Password IS NULL )";
+
+                command.Parameters.AddWithValue("@name", name);
+                command.Parameters.AddWithValue("@password", password);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (!reader.HasRows) return 0; // Niemanden mit diesem Namen und diesem Passwort gefunden
+
+                    while (reader.Read())
+                    {
+                        //Ist die Nachricht zum jetzigen Zeitpunt geblockt?
+                        if (!int.TryParse(reader.GetString(0), out int LogedInId)) return 0;
+
+                        return LogedInId;
+                    }
+                }
+            }
+            return 0;
         }
 
         #region Views
@@ -394,6 +423,42 @@ namespace MelBoxSql
 
             return overdueTable;
         }
+
+        public DataTable GetContactInfoView(int contactId)
+        {
+            DataTable contactTable = new DataTable
+            {
+                TableName = "Benutzerkonto"
+            };
+
+            try
+            {
+                using (var connection = new SqliteConnection(DataSource))
+                {
+                    connection.Open();
+
+
+                    var command1 = connection.CreateCommand();
+
+                    command1.CommandText = "SELECT * FROM \"Contact\" " +
+                                           "JOIN Company ON CompanyId = Company.Id " +
+                                           "WHERE Contact.Id = @id; ";
+                    command1.Parameters.AddWithValue("@id", contactId);
+
+                    using (var reader = command1.ExecuteReader())
+                    {
+                        contactTable.Load(reader);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Sql-Fehler GetContactInfoView() " + ex.GetType() + "\r\n" + ex.Message);
+            }
+
+            return contactTable;
+        }
+
 
         #endregion
     }

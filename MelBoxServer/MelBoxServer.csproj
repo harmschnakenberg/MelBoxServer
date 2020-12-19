@@ -64,6 +64,10 @@
       <Project>{15ada787-941b-41aa-83b5-c2ac51831ae3}</Project>
       <Name>MelBoxSql</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MelBoxWeb\MelBoxWeb.csproj">
+      <Project>{99c35357-7a3f-4c2f-8482-6215284eb921}</Project>
+      <Name>MelBoxWeb</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

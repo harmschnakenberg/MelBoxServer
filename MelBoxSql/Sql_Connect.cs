@@ -52,7 +52,7 @@ namespace MelBoxSql
                         //Kontakte
                         "CREATE TABLE \"Company\" (\"Id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"Name\" TEXT NOT NULL, \"Address\" TEXT, \"City\" TEXT); ",
 
-                        "CREATE TABLE \"Contact\"(\"Id\" INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, \"EntryTime\" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, \"Name\" TEXT NOT NULL, " +
+                        "CREATE TABLE \"Contact\"(\"Id\" INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, \"EntryTime\" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, \"Name\" TEXT NOT NULL, \"Password\" TEXT, " +
                         "\"CompanyId\" INTEGER, \"Email\" TEXT, \"Phone\" INTEGER, \"KeyWord\" TEXT, \"MaxInactiveHours\" INTEGER DEFAULT 0, \"SendWay\" INTEGER DEFAULT 0);",
 
                         //Nachrichten
@@ -103,12 +103,12 @@ namespace MelBoxSql
                 InsertCompany("_UNBEKANNT_", "Musterstraße 123", "12345 Modellstadt");
                 InsertCompany("Kreutzträger Kältetechnik GmbH & Co. KG", "Theodor-Barth-Str. 21", "28307 Bremen");
 
-                InsertContact("SMSZentrale", 1, "smszentrale@kreutztraeger.de", 4915142265412, SendToWay.None);
-                InsertContact("MelBox2Admin", 1, "harm.schnakenberg@kreutztraeger.de", 0, SendToWay.Sms & SendToWay.Email);
-                InsertContact("Bereitschaftshandy", 1, "bereitschaftshandy@kreutztraeger.de", 491728362586, SendToWay.None);
-                InsertContact("Kreutzträger Service", 1, "service@kreutztraeger.de", 0, SendToWay.None);
-                InsertContact("Henry Kreutzträger", 1, "henry.kreutztraeger@kreutztraeger.de", 491727889419, SendToWay.None);
-                InsertContact("Bernd Kreutzträger", 1, "bernd.kreutztraeger@kreutztraeger.de", 491727875067, SendToWay.None);
+                InsertContact("SMSZentrale", 2, "smszentrale@kreutztraeger.de", 4915142265412, SendToWay.None);
+                InsertContact("MelBox2Admin", 2, "harm.schnakenberg@kreutztraeger.de", 0, SendToWay.Sms & SendToWay.Email);
+                InsertContact("Bereitschaftshandy", 2, "bereitschaftshandy@kreutztraeger.de", 491728362586, SendToWay.None);
+                InsertContact("Kreutzträger Service", 2, "service@kreutztraeger.de", 0, SendToWay.None);
+                InsertContact("Henry Kreutzträger", 2, "henry.kreutztraeger@kreutztraeger.de", 491727889419, SendToWay.None);
+                InsertContact("Bernd Kreutzträger", 2, "bernd.kreutztraeger@kreutztraeger.de", 491727875067, SendToWay.None);
                 InsertContact("Harm privat", 1, "harm.schnakenberg@kreutztraeger.de", 4916095285304, SendToWay.Sms);
 
                 InsertRecMessage("Datenbank neu erstellt.", 0, "smszentrale@kreutztraeger.de");

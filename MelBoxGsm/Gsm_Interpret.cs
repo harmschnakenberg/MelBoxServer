@@ -129,7 +129,7 @@ namespace MelBoxGsm
 
             OnRaiseGsmSystemEvent(new GsmEventArgs(11181057, GsmEventArgs.Telegram.SmsStatus, "Stausreport empfangen mit Index " + IdNewMsg));
             //Lese neue Nachricht(en) [CMGL, damit in Antwort Index mitgelesen wird]
-            AddAtCommand("AT+CMGL=\"REC UNREAD\"");
+            AddAtCommand("AT+CMGL=\"ALL\"");
         }
 
         private void ParseRecieveNewSmsIndicator(string input)
@@ -174,6 +174,8 @@ namespace MelBoxGsm
                     byte.TryParse(m.Groups[1].Value, out byte index);
                     string status = m.Groups[2].Value;
                     byte trackingId = byte.Parse(m.Groups[4].Value);
+
+                    Console.WriteLine("Status-report für SMS-Index {0} erhalten.", trackingId);
                     byte trackingStatus = byte.Parse(m.Groups[7].Value);
 
                     if (status != "REC UNREAD" && status != "REC READ") continue; //nur empfangene Nachrichten

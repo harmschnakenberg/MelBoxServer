@@ -344,7 +344,7 @@ namespace MelBoxSql
 
                     var command1 = connection.CreateCommand();
 
-                    command1.CommandText = "SELECT * FROM \"SentMessagesView\" ORDER BY Gesendet DESC LIMIT 1000";
+                    command1.CommandText = "SELECT * FROM \"SentMessagesView\" ORDER BY Gesendet DESC LIMIT 1000 ";
 
                     using (var reader = command1.ExecuteReader())
                     {
@@ -440,9 +440,11 @@ namespace MelBoxSql
 
                     var command1 = connection.CreateCommand();
 
-                    command1.CommandText = "SELECT * FROM \"Contact\" " +
-                                           "JOIN Company ON CompanyId = Company.Id " +
+                    command1.CommandText = "SELECT Contact.Id AS ContactId, Contact.Name AS Name, Password, CompanyId, Company.Name AS CompanyName, Email, Phone, Contact.SendWay AS SendWay " +
+                                           "FROM \"Contact\" " +
+                                           "JOIN \"Company\" ON CompanyId = Company.Id " +
                                            "WHERE Contact.Id = @id; ";
+
                     command1.Parameters.AddWithValue("@id", contactId);
 
                     using (var reader = command1.ExecuteReader())
@@ -459,6 +461,39 @@ namespace MelBoxSql
             return contactTable;
         }
 
+
+        public DataTable GetAllCompanys()
+        {
+            DataTable companyTable = new DataTable
+            {
+                TableName = "Firmen"
+            };
+
+            try
+            {
+                using (var connection = new SqliteConnection(DataSource))
+                {
+                    connection.Open();
+
+
+                    var command1 = connection.CreateCommand();
+
+                    command1.CommandText = "SELECT * " +
+                                           "FROM \"Company\" ";
+
+                    using (var reader = command1.ExecuteReader())
+                    {
+                        companyTable.Load(reader);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Sql-Fehler GetAllCompanys() " + ex.GetType() + "\r\n" + ex.Message);
+            }
+
+            return companyTable;
+        }
 
         #endregion
     }

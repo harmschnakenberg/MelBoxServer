@@ -194,7 +194,7 @@ namespace MelBoxSql
                                           "\"ContactId\" = @contactId " +
                                           "WHERE \"Id\" = @shiftId; ";
 
-                    command.Parameters.AddWithValue("@startDate", SqlTime(startDate) );
+                    command.Parameters.AddWithValue("@startDate", SqlTime(startDate.ToUniversalTime().Date) );
                     command.Parameters.AddWithValue("@startHour", StartHour);
                     command.Parameters.AddWithValue("@endHour", EndHour);
                     command.Parameters.AddWithValue("@contactId", contactId);

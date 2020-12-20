@@ -81,7 +81,7 @@ namespace MelBoxSql
                         "FROM LogRecieved AS r JOIN Contact AS c ON FromContactId = c.Id JOIN MessageContent AS m ON ContentId = m.Id",
                         
                         "CREATE VIEW \"SentMessagesView\" AS SELECT LogRecievedId As Nr, Content AS Inhalt, SentTime AS Gesendet, Name AS An, Way AS Medium, ConfirmStatus As Sendestatus " +
-                        "FROM LogSent AS ls JOIN Contact AS c ON SentToId =  c.Id JOIN SendWay AS sw ON c.SendWay = sw.Code JOIN LogRecieved AS lr ON lr.Id = ls.LogRecievedId JOIN MessageContent AS mc ON mc.id = lr.FromContactId",
+                        "FROM LogSent AS ls JOIN Contact AS c ON SentToId =  c.Id JOIN SendWay AS sw ON c.SendWay = sw.Code JOIN LogRecieved AS lr ON lr.Id = ls.LogRecievedId JOIN MessageContent AS mc ON mc.id = lr.ContentId",
 
                         "CREATE VIEW \"OverdueView\" AS SELECT FromContactId AS ContactId, Name, MaxInactiveHours, RecieveTime AS LastRecieved, DATETIME(RecieveTime, '+' || MaxInactiveHours ||' hours') AS Timeout FROM LogRecieved " +
                         "JOIN Contact ON Contact.Id = LogRecieved.FromContactId WHERE MaxInactiveHours > 0 AND DATETIME(RecieveTime, '+' || MaxInactiveHours ||' hours') < Datetime('now')",
